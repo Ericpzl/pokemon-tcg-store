@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéSobres - Tienda principal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header style="padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+        <h2>PokéSobres</h2>
+        <nav style="display: flex; gap: 1.5rem;">
+            <a href="index.html" style="color: var(--primary-color); font-weight: bold;">Tienda</a>
+            <a href="cart.html" id="nav-cart-link">Carrito (0)</a>
+            <a href="inventario.html">Inventario</a>
+            <a href="album.html">Álbum</a>
+            <a href="#">Perfil</a>
+            <span id="nav-user-balance" style="font-weight: bold; color: var(--success-color); border-left: 1px solid var(--glass-border); padding-left: 1.5rem; display: flex; align-items: center;"></span>
+            <a href="add_funds.html" style="background: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; color: white; text-decoration: none; margin-left: 0.5rem; display: flex; align-items: center; justify-content: center; height: 1.5rem;" title="Añadir Saldo">+</a>
+        </nav>
+    </header>
+    <main style="padding: 2rem; max-width: 1200px; margin: 0 auto; display: flex; gap: 2rem;">
+        <div style="flex: 1;">
+            <!-- Daily Pack Section -->
+            <div id="daily-pack-section" style="background: linear-gradient(135deg, var(--bg-secondary), rgba(255, 215, 0, 0.1)); border: 2px solid var(--warning-color); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);">
+                <div>
+                    <h3 style="color: var(--warning-color); margin-bottom: 0.5rem; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">🎁 Sobre Diario Gratuito</h3>
+                    <p style="color: var(--text-muted);">Abre tu sobre diario y consigue una carta aleatoria para tu colección.</p>
+                </div>
+                <div style="text-align: center;">
+                    <button id="btn-claim-daily" class="btn" style="background: var(--warning-color); color: black; font-weight: bold; font-size: 1.1rem; padding: 1rem 2rem; display: none;" onclick="claimDailyPack()">¡Reclamar Gratis!</button>
+                    <div id="daily-countdown" style="font-family: monospace; font-size: 1.5rem; color: var(--error-color); font-weight: bold; background: rgba(0,0,0,0.5); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--error-color); display: none;">--:--:--</div>
+                </div>
+            </div>
+
+            <h3>Sobres Disponibles</h3>
+            <div id="store-container" class="store-grid">
+                <p style="color: var(--text-muted);">Cargando sobres disponibles...</p>
+            </div>
+        </div>
+        <aside style="width: 300px; background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+            <h3>Top Entrenadores</h3>
+            <ul id="ranking-list" class="ranking-list">
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Cargando ranking...</p>
+            </ul>
+        </aside>
+    </main>
+    <script src="../js/config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/cart.js"></script>
+</body>
+</html>

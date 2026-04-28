@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéSobres - Mi Álbum</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        .album-filters {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .album-filters input, .album-filters select {
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        .album-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+        .album-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .album-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            border-color: var(--primary-color);
+        }
+        .card-img-container {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .card-img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+        }
+        .badge-qty {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .heart-icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            transition: color 0.3s, transform 0.2s;
+        }
+        .heart-icon.active {
+            color: #ff4757;
+            text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+        }
+
+        /* Modal Styles */
+        .card-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .card-modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem;
+            display: flex;
+            gap: 3rem;
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            animation: modalPopIn 0.3s ease-out;
+        }
+        @keyframes modalPopIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .close-modal:hover { color: white; }
+        .modal-img {
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .modal-details {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .modal-details h2 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.5rem;
+        }
+        .btn-favorite {
+            margin-top: 2rem;
+            background: transparent;
+            border: 2px solid #ff4757;
+            color: #ff4757;
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        .btn-favorite:hover {
+            background: rgba(255, 71, 87, 0.1);
+        }
+        .btn-favorite.active {
+            background: #ff4757;
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
+        }
+
+        /* Holo Effect Styles */
+        .holo-card-container {
+            perspective: 1000px;
+            width: 300px;
+            height: 420px;
+        }
+        .holo-card {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .holo-card img {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            object-fit: cover;
+        }
+        .holo-glare {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 15px;
+            background: linear-gradient(
+                105deg,
+                transparent 20%,
+                rgba(255, 215, 0, 0.4) 25%,
+                rgba(255, 0, 128, 0.4) 30%,
+                rgba(0, 255, 255, 0.4) 35%,
+                transparent 40%
+            );
+            background-size: 300% 300%;
+            mix-blend-mode: color-dodge;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <header style="padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+        <h2>PokéSobres</h2>
+        <nav style="display: flex; gap: 1.5rem;">
+            <a href="index.html">Tienda</a>
+            <a href="cart.html" id="nav-cart-link">Carrito (0)</a>
+            <a href="inventario.html">Inventario</a>
+            <a href="album.html" style="color: var(--primary-color); font-weight: bold;">Álbum</a>
+            <a href="#">Perfil</a>
+            <span id="nav-user-balance" style="font-weight: bold; color: var(--success-color); border-left: 1px solid var(--glass-border); padding-left: 1.5rem; display: flex; align-items: center;"></span>
+            <a href="add_funds.html" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.9rem; margin-left: 0.5rem;">+</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="album-filters">
+            <input type="text" id="filter-name" placeholder="Buscar por nombre..." style="flex: 1;">
+            <select id="filter-type">
+                <option value="">Cualquier Tipo</option>
+                <option value="Fuego">Fuego</option>
+                <option value="Agua">Agua</option>
+                <option value="Planta">Planta</option>
+                <option value="Eléctrico">Eléctrico</option>
+                <option value="Psíquico">Psíquico</option>
+                <option value="Fantasma">Fantasma</option>
+            </select>
+            <select id="filter-rarity">
+                <option value="">Cualquier Rareza</option>
+                <option value="Común">Común</option>
+                <option value="Poco Común">Poco Común</option>
+                <option value="Rara">Rara</option>
+                <option value="Rara Secreta">Rara Secreta</option>
+            </select>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="filter-favorites">
+                Solo Favoritas ❤️
+            </label>
+        </div>
+
+        <div id="album-container" class="album-grid">
+            <p style="color: var(--text-muted); margin-left: 2rem;">Cargando tu colección...</p>
+        </div>
+    </main>
+
+    <!-- Modal Detalles Carta -->
+    <div class="card-modal-overlay" id="card-modal" onclick="if(event.target === this) closeCardModal()">
+        <div class="card-modal">
+            <span class="close-modal" onclick="closeCardModal()">&times;</span>
+            <div class="holo-card-container">
+                <div id="modal-holo-card" class="holo-card">
+                    <img id="modal-img" src="" alt="Carta">
+                    <div id="modal-holo-glare" class="holo-glare"></div>
+                </div>
+            </div>
+            <div class="modal-details" style="flex: 1;">
+                <h2 id="modal-name">Nombre de Carta</h2>
+                <span id="modal-rarity" style="color: var(--primary-color); font-weight: bold; margin-bottom: 2rem; display: block;">Rareza</span>
+                
+                <div class="stat-row">
+                    <span style="color: var(--text-muted);">Tipo</span>
+                    <span id="modal-type" style="font-weight: bold;">Tipo</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--text-muted);">HP</span>
+                    <span id="modal-hp" style="font-weight: bold;">0</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--text-muted);">Copias Poseídas</span>
+                    <span id="modal-qty" style="font-weight: bold;">x0</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--text-muted);">Fecha de Obtención</span>
+                    <span id="modal-date" style="font-weight: bold;">-</span>
+                </div>
+                <div class="stat-row">
+                    <span style="color: var(--text-muted);">Valor de Mercado</span>
+                    <span id="modal-price" style="font-weight: bold; color: var(--warning-color);">0 🪙</span>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button id="modal-fav-btn" class="btn-favorite" style="flex: 1; margin-top: 0;" onclick="toggleFavoriteFromModal()">
+                        ❤️ Añadir a Favoritos
+                    </button>
+                    <button class="btn" style="flex: 1; background: var(--glass-border); cursor: not-allowed;" title="Próximamente">
+                        Vender Carta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/album.js"></script>
+</body>
+</html>

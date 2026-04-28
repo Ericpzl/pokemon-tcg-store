@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - TCGDex Sync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .admin-form {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--glass-border);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        .info-box {
+            background: rgba(108, 92, 231, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header style="padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+        <h2>Panel de Administración (Secreto)</h2>
+        <nav style="display: flex; gap: 1.5rem;">
+            <a href="index.html">Volver a la Tienda</a>
+        </nav>
+    </header>
+
+    <main style="padding: 2rem;">
+        <div class="admin-form">
+            <h2 style="margin-bottom: 1rem;">Sincronizar Colección desde TCGDex</h2>
+            
+            <div class="info-box">
+                <p>¡Usando la API gratuita de TCGdex! No se requieren claves.</p>
+                <p><strong>Paso 1:</strong> Escribe el ID oficial de la colección que quieres importar (ej. <code>sv1</code> para Escarlata y Púrpura, <code>swsh1</code> para Espada y Escudo, <code>base1</code> para la Original).</p>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre del Sobre (Ej: Rivales Predestinados):</label>
+                <input type="text" id="custom-pack-name" placeholder="Si lo dejas vacío, usará el nombre oficial">
+            </div>
+
+            <div class="form-group">
+                <label>Precio del Sobre (🪙):</label>
+                <input type="number" id="custom-pack-price" value="250" placeholder="Ej: 250">
+            </div>
+
+            <div class="form-group">
+                <label>ID de la Colección TCGDex (Set ID):</label>
+                <input type="text" id="scrydex-collection-id" placeholder="Ej: sv1">
+            </div>
+
+            <button class="btn" style="width: 100%; margin-top: 1rem;" onclick="syncCollection()">Sincronizar Colección</button>
+            <p id="sync-status" style="margin-top: 1rem; text-align: center; color: var(--warning-color);"></p>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script>
+        async function syncCollection() {
+            const collectionId = document.getElementById('scrydex-collection-id').value;
+            const customName = document.getElementById('custom-pack-name').value;
+            const packPrice = document.getElementById('custom-pack-price').value;
+            const statusEl = document.getElementById('sync-status');
+
+            if (!collectionId) {
+                statusEl.textContent = "Por favor, introduce el ID de la colección.";
+                statusEl.style.color = "var(--error-color)";
+                return;
+            }
+
+            statusEl.textContent = "Conectando con TCGdex y guardando en MySQL... Por favor, espera.";
+            statusEl.style.color = "var(--warning-color)";
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/sync-tcgdex`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        collectionId: collectionId,
+                        customName: customName,
+                        packPrice: packPrice ? parseInt(packPrice) : 250
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusEl.textContent = "¡Conexión Exitosa! " + data.message;
+                    statusEl.style.color = "var(--success-color)";
+                } else {
+                    statusEl.textContent = "Error: " + data.error;
+                    statusEl.style.color = "var(--error-color)";
+                }
+            } catch (err) {
+                statusEl.textContent = "Fallo de conexión con el servidor Java local.";
+                statusEl.style.color = "var(--error-color)";
+            }
+        }
+    </script>
+</body>
+</html>

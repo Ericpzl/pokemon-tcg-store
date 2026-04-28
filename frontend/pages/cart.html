@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéSobres - Carrito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header style="padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+        <h2>PokéSobres <span style="font-size: 1rem; color: var(--text-muted);">| Carrito</span></h2>
+        <nav style="display: flex; gap: 1.5rem;">
+            <a href="index.html">Volver a la Tienda</a>
+            <span id="nav-user-balance" style="font-weight: bold; color: var(--success-color); border-left: 1px solid var(--glass-border); padding-left: 1.5rem; display: flex; align-items: center;"></span>
+            <a href="add_funds.html" style="background: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; color: white; text-decoration: none; margin-left: 0.5rem; display: flex; align-items: center; justify-content: center; height: 1.5rem;" title="Añadir Saldo">+</a>
+        </nav>
+    </header>
+    <main style="padding: 2rem; max-width: 1000px; margin: 0 auto;">
+        <h3>Tu Cesta de la Compra</h3>
+        
+        <div style="background: var(--glass-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border); margin-top: 1.5rem;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;" id="cart-table">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <th style="padding: 1rem; color: var(--text-muted);">Producto</th>
+                        <th style="padding: 1rem; color: var(--text-muted);">Precio ud.</th>
+                        <th style="padding: 1rem; color: var(--text-muted); text-align: center;">Cantidad</th>
+                        <th style="padding: 1rem; color: var(--text-muted); text-align: right;">Subtotal</th>
+                        <th style="padding: 1rem; color: var(--text-muted); text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-items-container">
+                    <!-- Javascript generará las filas aquí -->
+                </tbody>
+            </table>
+            
+            <div id="empty-cart-msg" style="text-align: center; padding: 2rem; display: none;">
+                <p style="color: var(--text-muted);">El carrito está vacío.</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 1.25rem;">
+                <span style="color: var(--text-muted);">Total estimado: </span>
+                <span style="font-weight: bold; color: var(--success-color);" id="cart-total">0 🪙</span>
+            </div>
+            <button class="btn" style="width: auto; padding: 1rem 3rem;" id="checkout-btn">Confirmar Compra</button>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/cart.js"></script>
+</body>
+</html>
