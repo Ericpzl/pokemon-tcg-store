@@ -5,15 +5,31 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String USER = "root";
-    private static final String PASSWORD = ""; // Cambiar según configuración local
 
     public static Connection getConnection() throws SQLException {
-        String dbHost = System.getenv("DB_HOST");
-        if (dbHost == null || dbHost.isEmpty()) {
-            dbHost = "localhost";
-        }
-        String url = "jdbc:mysql://" + dbHost + ":3306/pokemon_tcg_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
-        return DriverManager.getConnection(url, USER, PASSWORD);
+        // Lee la configuración desde variables de entorno (Render/Aiven)
+        // Si no existen, usa los valores locales por defecto
+        String host     = getEnv("DB_HOST",     "localhost");
+        String port     = getEnv("DB_PORT",     "3306");
+        String dbName   = getEnv("DB_NAME",     "pokemon_tcg_db");
+        String user     = getEnv("DB_USER",     "root");
+        String password = getEnv("DB_PASSWORD", "");
+
+        // Aiven MySQL requiere SSL
+        boolean useSSL = !host.equals("localhost");
+        String sslParam = useSSL ? "true" : "false";
+
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + dbName
+                + "?useSSL=" + sslParam
+                + "&requireSSL=" + sslParam
+                + "&serverTimezone=UTC"
+                + "&allowPublicKeyRetrieval=true";
+
+        return DriverManager.getConnection(url, user, password);
+    }
+
+    private static String getEnv(String key, String defaultValue) {
+        String value = System.getenv(key);
+        return (value != null && !value.isEmpty()) ? value : defaultValue;
     }
 }
