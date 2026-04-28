@@ -3,29 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PokéSobres - Tienda principal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>PokéSobres - Tienda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* ─── Store Grid ───────────────────────────────────────────── */
+        .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+
+        .expansion-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            position: relative;
+        }
+        .expansion-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(99,102,241,0.3);
+            border-color: var(--primary-color);
+        }
+        .expansion-card.selected {
+            border-color: #f0a500;
+            box-shadow: 0 0 20px rgba(240,165,0,0.35);
+        }
+
+        /* ─── Cover image ──────────────────────────────────────────── */
+        .exp-img-wrap {
+            width: 100%;
+            height: 180px;
+            background: radial-gradient(circle at center, rgba(99,102,241,0.12), rgba(0,0,0,0.3));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .exp-img-wrap img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+        }
+
+        /* Select checkbox */
+        .card-select-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            border: 2px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .card-select-btn.checked { background: #f0a500; border-color: #f0a500; color: white; font-weight: bold; }
+
+        .price-real { font-size: 0.75rem; color: var(--text-muted); margin-left: 0.3rem; }
+
+        /* ─── Floating multi-cart bar ──────────────────────────────── */
+        .cart-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid var(--primary-color);
+            border-radius: 16px;
+            padding: 1rem 2rem;
+            display: none;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: 0 8px 30px rgba(99,102,241,0.4);
+            z-index: 3000;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(80px); opacity: 0; }
+            to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+        }
+        .cart-bar-info { color: white; font-weight: bold; }
+        .cart-bar-info span { color: #f0a500; }
+        .btn-cart-confirm {
+            background: linear-gradient(135deg, var(--primary-color), #818cf8);
+            color: white; border: none; padding: 0.7rem 1.5rem;
+            border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+        .btn-cart-confirm:hover { opacity: 0.85; }
+        .btn-cart-cancel {
+            background: transparent; color: var(--text-muted);
+            border: 1px solid var(--glass-border); padding: 0.7rem 1.2rem;
+            border-radius: 10px; cursor: pointer; font-size: 0.9rem;
+        }
+
+        /* ─── Pack Detail Modal ────────────────────────────────────── */
+        .pack-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .pack-modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            display: flex;
+            gap: 3rem;
+            max-width: 820px;
+            width: 92%;
+            position: relative;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.9);
+            animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes popIn {
+            0%   { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1);   opacity: 1; }
+        }
+        .close-pack-modal {
+            position: absolute; top: 18px; right: 22px;
+            font-size: 2rem; cursor: pointer; color: var(--text-muted);
+        }
+        .close-pack-modal:hover { color: white; }
+
+        /* 3D Pack */
+        .pack-3d-wrap {
+            perspective: 900px;
+            width: 200px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pack-3d {
+            width: 180px;
+            height: 250px;
+            border-radius: 14px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: floatPack 3s ease-in-out infinite;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+        }
+        @keyframes floatPack {
+            0%,100% { transform: rotateY(-15deg) rotateX(5deg) translateY(0);   box-shadow: 0 20px 40px rgba(0,0,0,0.7); }
+            50%      { transform: rotateY(15deg) rotateX(-5deg) translateY(-10px); box-shadow: 0 30px 50px rgba(99,102,241,0.5); }
+        }
+        .pack-3d img {
+            width: 100%; height: 100%;
+            border-radius: 14px;
+            object-fit: contain;
+        }
+        .pack-shine {
+            position: absolute; inset: 0; border-radius: 14px;
+            background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+            background-size: 200% 200%;
+            animation: shine 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes shine {
+            0%,100% { background-position: 200% 200%; }
+            50%      { background-position: 0% 0%; }
+        }
+
+        /* Pack info */
+        .pack-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .pack-info h2 { font-size: 2rem; margin-bottom: 0.3rem; }
+        .pack-info .pack-set-tag {
+            display: inline-block;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 20px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+        .pack-stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.95rem;
+        }
+        .pack-stat-row .label { color: var(--text-muted); }
+        .pack-description {
+            margin: 1.2rem 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 0.8rem;
+            border-left: 3px solid var(--primary-color);
+        }
+        .btn-modal-cart {
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), #818cf8);
+            color: white; border: none; padding: 1rem;
+            border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1rem;
+            transition: opacity 0.2s; width: 100%;
+        }
+        .btn-modal-cart:hover { opacity: 0.85; }
+
+        /* toast */
+        .cart-toast {
+            position: fixed; top: 5rem; right: 2rem;
+            background: var(--primary-color); color: white;
+            padding: 1rem 1.5rem; border-radius: 12px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(99,102,241,0.4); z-index: 9999;
+            animation: fadeInOut 2.5s ease forwards;
+        }
+        @keyframes fadeInOut {
+            0%   { opacity:0; transform:translateY(-20px); }
+            15%  { opacity:1; transform:translateY(0); }
+            80%  { opacity:1; }
+            100% { opacity:0; }
+        }
+    </style>
 </head>
 <body>
     <header style="padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
         <h2>PokéSobres</h2>
-        <nav style="display: flex; gap: 1.5rem;">
+        <nav style="display: flex; gap: 1.5rem; align-items: center;">
             <a href="index.html" style="color: var(--primary-color); font-weight: bold;">Tienda</a>
             <a href="cart.html" id="nav-cart-link">Carrito (0)</a>
             <a href="inventario.html">Inventario</a>
             <a href="album.html">Álbum</a>
             <a href="#">Perfil</a>
-            <span id="nav-user-balance" style="font-weight: bold; color: var(--success-color); border-left: 1px solid var(--glass-border); padding-left: 1.5rem; display: flex; align-items: center;"></span>
-            <a href="add_funds.html" style="background: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; color: white; text-decoration: none; margin-left: 0.5rem; display: flex; align-items: center; justify-content: center; height: 1.5rem;" title="Añadir Saldo">+</a>
+            <span id="nav-user-balance" style="font-weight: bold; color: var(--success-color); border-left: 1px solid var(--glass-border); padding-left: 1.5rem;"></span>
+            <a href="add_funds.html" class="btn" style="padding: 0.3rem 0.7rem; font-size: 0.9rem;" title="Añadir Saldo">+</a>
         </nav>
     </header>
+
     <main style="padding: 2rem; max-width: 1200px; margin: 0 auto; display: flex; gap: 2rem;">
         <div style="flex: 1;">
-            <!-- Daily Pack Section -->
-            <div id="daily-pack-section" style="background: linear-gradient(135deg, var(--bg-secondary), rgba(255, 215, 0, 0.1)); border: 2px solid var(--warning-color); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);">
+            <!-- Daily Pack -->
+            <div id="daily-pack-section" style="background: linear-gradient(135deg, var(--bg-secondary), rgba(255,215,0,0.1)); border: 2px solid var(--warning-color); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 20px rgba(255,215,0,0.2);">
                 <div>
-                    <h3 style="color: var(--warning-color); margin-bottom: 0.5rem; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">🎁 Sobre Diario Gratuito</h3>
+                    <h3 style="color: var(--warning-color); margin-bottom: 0.5rem; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🎁 Sobre Diario Gratuito</h3>
                     <p style="color: var(--text-muted);">Abre tu sobre diario y consigue una carta aleatoria para tu colección.</p>
                 </div>
                 <div style="text-align: center;">
@@ -34,18 +264,72 @@
                 </div>
             </div>
 
-            <h3>Sobres Disponibles</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3>Sobres Disponibles</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Haz clic en un sobre para ver detalles · 🏷️ para seleccionar varios</p>
+            </div>
             <div id="store-container" class="store-grid">
                 <p style="color: var(--text-muted);">Cargando sobres disponibles...</p>
             </div>
         </div>
-        <aside style="width: 300px; background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+
+        <aside style="width: 300px; background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border); align-self: flex-start;">
             <h3>Top Entrenadores</h3>
             <ul id="ranking-list" class="ranking-list">
                 <p style="color: var(--text-muted); font-size: 0.9rem;">Cargando ranking...</p>
             </ul>
         </aside>
     </main>
+
+    <!-- Floating multi-select cart bar -->
+    <div class="cart-bar" id="cart-bar">
+        <div class="cart-bar-info">
+            🛒 <span id="cart-bar-count">0</span> sobre(s) · Total: <span id="cart-bar-total">0</span>🪙
+        </div>
+        <button class="btn-cart-confirm" onclick="addSelectionToCart()">Añadir al Carrito</button>
+        <button class="btn-cart-cancel" onclick="clearSelection()">✕ Cancelar</button>
+    </div>
+
+    <!-- Pack Detail Modal -->
+    <div class="pack-modal-overlay" id="pack-modal" onclick="if(event.target===this)closePackModal()">
+        <div class="pack-modal">
+            <span class="close-pack-modal" onclick="closePackModal()">×</span>
+
+            <div class="pack-3d-wrap">
+                <div class="pack-3d" id="modal-pack-3d">
+                    <img id="modal-pack-img" src="" alt="Sobre">
+                    <div class="pack-shine"></div>
+                </div>
+            </div>
+
+            <div class="pack-info">
+                <h2 id="modal-pack-name">Nombre del Sobre</h2>
+                <span class="pack-set-tag" id="modal-pack-tag">Colección Pokémon TCG</span>
+
+                <p class="pack-description" id="modal-pack-desc"></p>
+
+                <div class="pack-stat-row">
+                    <span class="label">Precio en Monedas</span>
+                    <span id="modal-pack-coins" style="font-weight: bold; color: var(--success-color);"></span>
+                </div>
+                <div class="pack-stat-row">
+                    <span class="label">Equivalente Real</span>
+                    <span id="modal-pack-real" style="font-weight: bold; color: var(--warning-color);"></span>
+                </div>
+                <div class="pack-stat-row">
+                    <span class="label">Fecha de Lanzamiento</span>
+                    <span id="modal-pack-date" style="font-weight: bold;"></span>
+                </div>
+                <div class="pack-stat-row">
+                    <span class="label">Cartas por Sobre</span>
+                    <span style="font-weight: bold;">5 cartas aleatorias</span>
+                </div>
+
+                <button class="btn-modal-cart" onclick="addCurrentPackToCart()">🛒 Añadir al Carrito</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/config.js"></script>
     <script src="../js/app.js"></script>
     <script src="../js/cart.js"></script>

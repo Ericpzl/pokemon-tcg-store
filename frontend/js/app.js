@@ -1,5 +1,11 @@
+// Coin → EUR conversion rate: 100 coins = 0.99€
+const COIN_TO_EUR = 0.99 / 100;
+
+let allExpansions = [];
+let selectedExpansions = new Set(); // expansion ids selected for bulk add
+let currentModalExpansion = null;
+
 document.addEventListener("DOMContentLoaded", () => {
-    // Verificar sesión (simulada)
     const userData = localStorage.getItem("user");
     if (!userData) {
         alert("Debes iniciar sesión para acceder a la tienda.");
@@ -8,11 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const user = JSON.parse(userData);
-    
     const balanceEl = document.getElementById("nav-user-balance");
-    if (balanceEl) {
-        balanceEl.textContent = `${user.balance} 🪙`;
-    }
+    if (balanceEl) balanceEl.textContent = `${user.balance} 🪙`;
 
     updateCartCounter();
     loadExpansions();
@@ -20,157 +23,261 @@ document.addEventListener("DOMContentLoaded", () => {
     checkDailyStatus();
 });
 
+// ──────────────────────────────────────────────────────────────
+// Load expansions
+// ──────────────────────────────────────────────────────────────
 async function loadExpansions() {
     try {
         const response = await fetch(`${API_BASE_URL}/expansions`);
         const expansions = await response.json();
-        const storeContainer = document.getElementById("store-container");
-
-        storeContainer.innerHTML = ""; // Limpiar loading
-
-        if (expansions.length === 0) {
-            storeContainer.innerHTML = '<p style="color: var(--text-muted);">No hay sobres disponibles en este momento.</p>';
-            return;
-        }
-
-        expansions.forEach(exp => {
-            const card = document.createElement("div");
-            card.className = "expansion-card";
-            card.innerHTML = `
-                <div class="exp-image" style="background-color: rgba(255,255,255,0.05); height: 180px; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 1rem;">
-                    ${exp.coverImage ? `<img src="${exp.coverImage}" alt="${exp.name}" style="max-height: 100%; border-radius: 8px;">` : `<span style="color:#6366f1">Sin Portada</span>`}
-                </div>
-                <h4>${exp.name}</h4>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Lanzamiento: ${exp.releaseDate || 'N/A'}</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
-                    <span style="font-weight: bold; color: var(--success-color);">${exp.packPrice} 🪙</span>
-                    <button class="btn btn-sm" onclick="addToCart(${exp.id}, '${exp.name.replace(/'/g, "\\'")}', ${exp.packPrice}, '${exp.coverImage || ''}')">Añadir al Carrito</button>
-                </div>
-            `;
-            storeContainer.appendChild(card);
-        });
-
+        allExpansions = expansions;
+        renderExpansions();
     } catch (error) {
         console.error("Error cargando sobres:", error);
     }
 }
 
+function renderExpansions() {
+    const storeContainer = document.getElementById("store-container");
+    storeContainer.innerHTML = "";
+
+    if (allExpansions.length === 0) {
+        storeContainer.innerHTML = '<p style="color: var(--text-muted);">No hay sobres disponibles en este momento.</p>';
+        return;
+    }
+
+    allExpansions.forEach(exp => {
+        const isSelected = selectedExpansions.has(exp.id);
+        const realPrice = (exp.packPrice * COIN_TO_EUR).toFixed(2);
+
+        const card = document.createElement("div");
+        card.className = `expansion-card ${isSelected ? "selected" : ""}`;
+        card.id = `exp-${exp.id}`;
+        card.innerHTML = `
+            <!-- Select toggle -->
+            <div class="card-select-btn ${isSelected ? "checked" : ""}" 
+                 onclick="event.stopPropagation(); toggleSelectExp(${exp.id})" title="Seleccionar varios">
+                ${isSelected ? "✓" : "🏷️"}
+            </div>
+
+            <!-- Cover image (fixed framing) -->
+            <div class="exp-img-wrap" onclick="openPackModal(${exp.id})">
+                ${exp.coverImage
+                    ? `<img src="${exp.coverImage}" alt="${exp.name}" loading="lazy">`
+                    : `<span style="color:#6366f1;font-size:2rem;">📦</span>`}
+            </div>
+
+            <h4 style="margin-bottom:0.3rem;" onclick="openPackModal(${exp.id})">${exp.name}</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.8rem;">
+                📅 ${exp.releaseDate || 'N/A'}
+            </p>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+                <span style="font-weight:bold; color: var(--success-color);">
+                    ${exp.packPrice} 🪙
+                    <span style="color:var(--text-muted); font-size:0.75rem; display:block;">≈ ${realPrice}€</span>
+                </span>
+                <button class="btn btn-sm" onclick="event.stopPropagation(); quickAddToCart(${exp.id})">
+                    🛒 Carrito
+                </button>
+            </div>
+        `;
+        storeContainer.appendChild(card);
+    });
+
+    updateCartBar();
+}
+
+// ──────────────────────────────────────────────────────────────
+// Pack Detail Modal
+// ──────────────────────────────────────────────────────────────
+const PACK_DESCRIPTIONS = [
+    "Una colección repleta de Pokémon poderosos y cartas especiales de entrenador. Consigue tus favoritos y construye el mazo definitivo.",
+    "Descubre criaturas míticas y ataques devastadores. Cada sobre es una aventura llena de sorpresas y rarísimas cartas holográficas.",
+    "Colección con cartas de edición especial, incluyendo versiones alternativas y poderosos Pokémon-ex que cambiarán tu estrategia.",
+    "Nuevas mecánicas de juego y Pokémon nunca vistos antes. La expansión más esperada por los coleccionistas y jugadores competitivos.",
+    "Un viaje a través de todas las regiones Pokémon. Sorpréndete con ilustraciones espectaculares y habilidades únicas.",
+];
+
+window.openPackModal = function(expId) {
+    const exp = allExpansions.find(e => e.id === expId);
+    if (!exp) return;
+    currentModalExpansion = exp;
+
+    document.getElementById("modal-pack-img").src = exp.coverImage || "";
+    document.getElementById("modal-pack-name").textContent = exp.name;
+    document.getElementById("modal-pack-tag").textContent = "Colección Pokémon TCG";
+    document.getElementById("modal-pack-coins").textContent = `${exp.packPrice} 🪙`;
+    document.getElementById("modal-pack-real").textContent = `≈ ${(exp.packPrice * COIN_TO_EUR).toFixed(2)} €`;
+    document.getElementById("modal-pack-date").textContent = exp.releaseDate || "N/A";
+
+    // Random but consistent description per expansion
+    const descIdx = exp.id % PACK_DESCRIPTIONS.length;
+    document.getElementById("modal-pack-desc").textContent = PACK_DESCRIPTIONS[descIdx];
+
+    document.getElementById("pack-modal").style.display = "flex";
+};
+
+window.closePackModal = function() {
+    document.getElementById("pack-modal").style.display = "none";
+    currentModalExpansion = null;
+};
+
+window.addCurrentPackToCart = function() {
+    if (!currentModalExpansion) return;
+    quickAddToCart(currentModalExpansion.id);
+    closePackModal();
+};
+
+// ──────────────────────────────────────────────────────────────
+// Multi-select logic
+// ──────────────────────────────────────────────────────────────
+window.toggleSelectExp = function(expId) {
+    if (selectedExpansions.has(expId)) {
+        selectedExpansions.delete(expId);
+    } else {
+        selectedExpansions.add(expId);
+    }
+    renderExpansions();
+};
+
+function updateCartBar() {
+    const bar = document.getElementById("cart-bar");
+    if (selectedExpansions.size === 0) { bar.style.display = "none"; return; }
+
+    const total = allExpansions
+        .filter(e => selectedExpansions.has(e.id))
+        .reduce((sum, e) => sum + e.packPrice, 0);
+
+    document.getElementById("cart-bar-count").textContent = selectedExpansions.size;
+    document.getElementById("cart-bar-total").textContent = total;
+    bar.style.display = "flex";
+}
+
+window.addSelectionToCart = function() {
+    if (selectedExpansions.size === 0) return;
+    selectedExpansions.forEach(expId => {
+        const exp = allExpansions.find(e => e.id === expId);
+        if (exp) _addToCartRaw(exp.id, exp.name, exp.packPrice, exp.coverImage);
+    });
+    showToast(`✅ ${selectedExpansions.size} sobre(s) añadido(s) al carrito`);
+    selectedExpansions.clear();
+    renderExpansions();
+    updateCartCounter();
+};
+
+window.clearSelection = function() {
+    selectedExpansions.clear();
+    renderExpansions();
+};
+
+// ──────────────────────────────────────────────────────────────
+// Cart helpers
+// ──────────────────────────────────────────────────────────────
+window.quickAddToCart = function(expId) {
+    const exp = allExpansions.find(e => e.id === expId);
+    if (!exp) return;
+    _addToCartRaw(exp.id, exp.name, exp.packPrice, exp.coverImage);
+    showToast(`🛒 "${exp.name}" añadido al carrito`);
+    updateCartCounter();
+};
+
+function _addToCartRaw(id, name, price, coverImage) {
+    let cart = JSON.parse(localStorage.getItem("pokesobres_cart") || "[]");
+    const existing = cart.find(item => item.expansionId === id);
+    if (existing) { existing.quantity += 1; }
+    else { cart.push({ expansionId: id, expansionName: name, unitPrice: price, quantity: 1, coverImage: coverImage }); }
+    localStorage.setItem("pokesobres_cart", JSON.stringify(cart));
+}
+
+// Keep backward-compat alias
+window.addToCart = function(id, name, price, coverImage) {
+    _addToCartRaw(id, name, price, coverImage);
+    showToast(`🛒 "${name}" añadido al carrito`);
+    updateCartCounter();
+};
+
+function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "cart-toast";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+}
+
+function updateCartCounter() {
+    let cart = JSON.parse(localStorage.getItem("pokesobres_cart") || "[]");
+    let total = cart.reduce((acc, item) => acc + item.quantity, 0);
+    const cartLink = document.getElementById("nav-cart-link");
+    if (cartLink) cartLink.textContent = `Carrito (${total})`;
+}
+
+// ──────────────────────────────────────────────────────────────
+// Ranking
+// ──────────────────────────────────────────────────────────────
 async function loadRanking() {
     try {
         const response = await fetch(`${API_BASE_URL}/ranking`);
         const ranking = await response.json();
         const rankingList = document.getElementById("ranking-list");
-
         rankingList.innerHTML = "";
-
         ranking.forEach((user, index) => {
             const li = document.createElement("li");
-            li.style.display = "flex";
-            li.style.justifyContent = "space-between";
-            li.style.padding = "0.75rem 0";
-            li.style.borderBottom = "1px solid var(--glass-border)";
-            
-            let medalla = "";
-            if(index === 0) medalla = "🥇 ";
-            else if(index === 1) medalla = "🥈 ";
-            else if(index === 2) medalla = "🥉 ";
-            else medalla = `${index + 1}. `;
-
+            li.style.cssText = "display:flex;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid var(--glass-border);";
+            const medals = ["🥇 ", "🥈 ", "🥉 "];
             li.innerHTML = `
-                <span>${medalla}${user.username}</span>
-                <span style="color: var(--success-color); font-weight: 600;">${user.balance} 🪙</span>
+                <span>${medals[index] || `${index+1}. `}${user.username}</span>
+                <span style="color:var(--success-color);font-weight:600;">${user.balance} 🪙</span>
             `;
             rankingList.appendChild(li);
         });
-
-    } catch (error) {
-        console.error("Error cargando ranking:", error);
-    }
+    } catch (error) { console.error("Error cargando ranking:", error); }
 }
 
-// Lógica temporal para que al pulsar 'Añadir al Carrito' en la tienda se guarden datos
-window.addToCart = function(id, name, price, coverImage) {
-    let rawCart = localStorage.getItem("pokesobres_cart");
-    let cart = rawCart ? JSON.parse(rawCart) : [];
-
-    const existingItem = cart.find(item => item.expansionId === id);
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            expansionId: id,
-            expansionName: name,
-            unitPrice: price,
-            quantity: 1,
-            coverImage: coverImage
-        });
-    }
-
-    localStorage.setItem("pokesobres_cart", JSON.stringify(cart));
-    alert(name + " añadido al carrito.");
-    updateCartCounter();
-};
-
-function updateCartCounter() {
-    let rawCart = localStorage.getItem("pokesobres_cart");
-    let cart = rawCart ? JSON.parse(rawCart) : [];
-    
-    let totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-    const cartLink = document.getElementById("nav-cart-link");
-    if (cartLink) {
-        cartLink.textContent = `Carrito (${totalItems})`;
-    }
-}
-
+// ──────────────────────────────────────────────────────────────
+// Daily pack
+// ──────────────────────────────────────────────────────────────
 let dailyCountdownInterval = null;
 
 async function checkDailyStatus() {
     const userData = localStorage.getItem("user");
     if (!userData) return;
     const user = JSON.parse(userData);
-
     const btn = document.getElementById("btn-claim-daily");
     const countdown = document.getElementById("daily-countdown");
-    if (!btn || !countdown) return; // Not on index.html
+    if (!btn || !countdown) return;
 
     try {
         const response = await fetch(`${API_BASE_URL}/store/daily-status/${user.id}`);
         const data = await response.json();
+        if (!response.ok) return;
 
-        if (response.ok) {
-            let msUntilNext = data.msUntilNext;
+        let msUntilNext = data.msUntilNext;
+        if (dailyCountdownInterval) clearInterval(dailyCountdownInterval);
 
-            if (dailyCountdownInterval) clearInterval(dailyCountdownInterval);
-
-            if (msUntilNext <= 0) {
-                btn.style.display = "inline-block";
-                countdown.style.display = "none";
-            } else {
-                btn.style.display = "none";
-                countdown.style.display = "inline-block";
-                
-                const updateTimer = () => {
-                    if (msUntilNext <= 0) {
-                        clearInterval(dailyCountdownInterval);
-                        btn.style.display = "inline-block";
-                        countdown.style.display = "none";
-                        return;
-                    }
-                    
-                    const h = Math.floor(msUntilNext / (1000 * 60 * 60));
-                    const m = Math.floor((msUntilNext % (1000 * 60 * 60)) / (1000 * 60));
-                    const s = Math.floor((msUntilNext % (1000 * 60)) / 1000);
-                    countdown.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                    msUntilNext -= 1000;
-                };
-                
-                updateTimer();
-                dailyCountdownInterval = setInterval(updateTimer, 1000);
-            }
+        if (msUntilNext <= 0) {
+            btn.style.display = "inline-block";
+            countdown.style.display = "none";
+        } else {
+            btn.style.display = "none";
+            countdown.style.display = "inline-block";
+            const tick = () => {
+                if (msUntilNext <= 0) {
+                    clearInterval(dailyCountdownInterval);
+                    btn.style.display = "inline-block";
+                    countdown.style.display = "none";
+                    return;
+                }
+                const h = Math.floor(msUntilNext / 3600000);
+                const m = Math.floor((msUntilNext % 3600000) / 60000);
+                const s = Math.floor((msUntilNext % 60000) / 1000);
+                countdown.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                msUntilNext -= 1000;
+            };
+            tick();
+            dailyCountdownInterval = setInterval(tick, 1000);
         }
-    } catch (error) {
-        console.error("Error checking daily status:", error);
-    }
+    } catch (error) { console.error("Error checking daily status:", error); }
 }
 
 window.claimDailyPack = async function() {
@@ -183,12 +290,10 @@ window.claimDailyPack = async function() {
         });
         const data = await response.json();
         if (response.ok) {
-            alert(`¡Sobre reclamado con éxito! Ve a tu Inventario para abrirlo.`);
+            alert("¡Sobre reclamado con éxito! Ve a tu Inventario para abrirlo.");
             checkDailyStatus();
         } else {
             alert(data.error);
         }
-    } catch (error) {
-        alert("Error al reclamar el sobre.");
-    }
-}
+    } catch { alert("Error al reclamar el sobre."); }
+};
