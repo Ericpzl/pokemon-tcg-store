@@ -124,6 +124,7 @@ CREATE TABLE CollectionAlbum (
   card_id INT NOT NULL,
   quantity INT DEFAULT 1,
   is_favorite TINYINT(1) DEFAULT 0,
+  obtained_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY unique_user_card (user_id, card_id),
   FOREIGN KEY (user_id) REFERENCES Users(id),
   FOREIGN KEY (card_id) REFERENCES Cards(id)

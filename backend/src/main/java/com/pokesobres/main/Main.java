@@ -35,6 +35,7 @@ public class Main {
         // Endpoints de Álbum
         app.get("/api/album/{userId}", com.pokesobres.controller.AlbumController::getAlbum);
         app.post("/api/album/favorite", com.pokesobres.controller.AlbumController::toggleFavorite);
+        app.post("/api/album/sell", com.pokesobres.controller.AlbumController::sellCards);
 
         // Endpoints de Recompensa Diaria
         app.get("/api/store/daily-status/{userId}", com.pokesobres.controller.DailyRewardController::getDailyStatus);

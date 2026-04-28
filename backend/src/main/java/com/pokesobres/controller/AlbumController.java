@@ -4,6 +4,7 @@ import com.pokesobres.service.AlbumService;
 import io.javalin.http.Context;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Map;
 
 public class AlbumController {
@@ -39,6 +40,27 @@ public class AlbumController {
             }
         } catch (Exception e) {
             ctx.status(400).json(Map.of("error", e.getMessage()));
+        }
+    }
+
+    public static void sellCards(Context ctx) {
+        try {
+            Map<String, Object> body = mapper.readValue(ctx.body(), new TypeReference<Map<String, Object>>(){});
+            int userId = (Integer) body.get("userId");
+            List<Integer> cardIds = mapper.convertValue(body.get("cardIds"), new TypeReference<List<Integer>>(){});
+
+            if (cardIds == null || cardIds.isEmpty()) {
+                ctx.status(400).json(Map.of("error", "No se indicaron cartas para vender."));
+                return;
+            }
+
+            double earned = albumService.sellCards(userId, cardIds);
+            ctx.status(200).json(Map.of(
+                "message", "Cartas vendidas correctamente.",
+                "coinsEarned", earned
+            ));
+        } catch (Exception e) {
+            ctx.status(500).json(Map.of("error", e.getMessage()));
         }
     }
 }
