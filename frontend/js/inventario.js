@@ -1,55 +1,59 @@
 // ════════════════════════════════════════════════════════════
-//  SOUND ENGINE  –  Web Audio API (no external files needed)
+//  SOUND ENGINE  –  suave, estilo baraja de cartas
 // ════════════════════════════════════════════════════════════
 const SoundFX = (() => {
     let ctx = null;
 
-    // MUST be called synchronously inside a click handler
     function init() {
-        if (!ctx) {
-            ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (ctx.state === "suspended") {
-            ctx.resume();
-        }
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === "suspended") ctx.resume();
     }
 
-    function tick(delaySeconds, freq = 900, volume = 0.3) {
+    // Soft "click" — sine + lowpass filter, very short envelope
+    function tick(delaySeconds, freq = 320, volume = 0.07) {
         if (!ctx) return;
         const now = ctx.currentTime;
-        const t = now + delaySeconds;
+        const t   = now + delaySeconds;
 
-        const osc  = ctx.createOscillator();
-        const gain = ctx.createGain();
+        const osc    = ctx.createOscillator();
+        const gain   = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
 
-        osc.type = "square";
+        osc.type = "sine";
         osc.frequency.setValueAtTime(freq, t);
+        // Very fast attack, super short decay → sounds like a soft click
         gain.gain.setValueAtTime(0, t);
-        gain.gain.linearRampToValueAtTime(volume, t + 0.005);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+        gain.gain.linearRampToValueAtTime(volume, t + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
 
-        osc.connect(gain);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(1200, t);   // cut harshness
+
+        osc.connect(filter);
+        filter.connect(gain);
         gain.connect(ctx.destination);
+
         osc.start(t);
-        osc.stop(t + 0.1);
+        osc.stop(t + 0.06);
     }
 
+    // Gentle winner chime — soft sine bell
     function winnerDing(delaySeconds) {
         if (!ctx) return;
         const now = ctx.currentTime;
-        const t = now + delaySeconds;
-        [1, 2, 3].forEach((h) => {
+        const t   = now + delaySeconds;
+        [523, 659, 784].forEach((freq, i) => {   // C5 - E5 - G5 (major chord)
             const osc  = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(880 * h, t);
-            gain.gain.setValueAtTime(0, t);
-            gain.gain.linearRampToValueAtTime(0.3 / h, t + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
+            osc.frequency.setValueAtTime(freq, t + i * 0.07);
+            gain.gain.setValueAtTime(0, t + i * 0.07);
+            gain.gain.linearRampToValueAtTime(0.12, t + i * 0.07 + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.07 + 1.4);
             osc.connect(gain);
             gain.connect(ctx.destination);
-            osc.start(t);
-            osc.stop(t + 2);
+            osc.start(t + i * 0.07);
+            osc.stop(t + i * 0.07 + 1.5);
         });
     }
 
@@ -58,18 +62,17 @@ const SoundFX = (() => {
         const TICKS = 38;
         for (let i = 0; i < TICKS; i++) {
             const progress = i / TICKS;
-            // ease-out: dense at start, sparse at end
             const eased = 1 - Math.pow(1 - progress, 2.4);
-            const t = eased * (totalDuration - 0.3);
-            const freq = 1100 - progress * 400;
-            tick(t, freq, 0.25);
+            const t    = eased * (totalDuration - 0.3);
+            // Pitch gently drops from 400 → 220 Hz as speed slows
+            const freq = 400 - progress * 180;
+            tick(t, freq, 0.07);
         }
-        // Extra slow taps at very end
+        // Last slow taps
         [5.1, 5.4, 5.65, 5.82, 5.94].forEach((t, i) => {
-            tick(t, 660 - i * 30, 0.2);
+            tick(t, 220 - i * 15, 0.06);
         });
-        // Winner bell
-        winnerDing(totalDuration + 0.1);
+        winnerDing(totalDuration + 0.15);
     }
 
     return { init, scheduleRouletteSounds };
