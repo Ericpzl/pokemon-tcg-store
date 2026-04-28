@@ -4,94 +4,75 @@
 const SoundFX = (() => {
     let ctx = null;
 
-    function getCtx() {
-        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-        return ctx;
+    // MUST be called synchronously inside a click handler
+    function init() {
+        if (!ctx) {
+            ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (ctx.state === "suspended") {
+            ctx.resume();
+        }
     }
 
-    /**
-     * CS:GO-style tick: short percussive blip
-     * @param {number} t  – delay in seconds from now
-     * @param {number} freq  – pitch (higher = earlier/faster card)
-     */
-    function scheduleTick(t, freq = 900) {
-        const ac = getCtx();
-        const now = ac.currentTime;
+    function tick(delaySeconds, freq = 900, volume = 0.3) {
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const t = now + delaySeconds;
 
-        const osc = ac.createOscillator();
-        const gain = ac.createGain();
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
 
         osc.type = "square";
-        osc.frequency.setValueAtTime(freq, now + t);
-
-        gain.gain.setValueAtTime(0, now + t);
-        gain.gain.linearRampToValueAtTime(0.25, now + t + 0.005);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + t + 0.08);
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(volume, t + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
 
         osc.connect(gain);
-        gain.connect(ac.destination);
-
-        osc.start(now + t);
-        osc.stop(now + t + 0.1);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.1);
     }
 
-    /**
-     * Winner "ding" – pleasant bell-like tone
-     * @param {number} t – delay in seconds from now
-     */
-    function scheduleWinnerDing(t) {
-        const ac = getCtx();
-        const now = ac.currentTime;
-
-        // Fundamental
-        [1, 2, 3].forEach((harmonic, i) => {
-            const osc = ac.createOscillator();
-            const gain = ac.createGain();
+    function winnerDing(delaySeconds) {
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const t = now + delaySeconds;
+        [1, 2, 3].forEach((h) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(880 * harmonic, now + t);
-            gain.gain.setValueAtTime(0, now + t);
-            gain.gain.linearRampToValueAtTime(0.35 / harmonic, now + t + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + t + 1.5 - i * 0.2);
+            osc.frequency.setValueAtTime(880 * h, t);
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.3 / h, t + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
             osc.connect(gain);
-            gain.connect(ac.destination);
-            osc.start(now + t);
-            osc.stop(now + t + 2);
+            gain.connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + 2);
         });
     }
 
-    /**
-     * Schedule all ticks for a 6-second roulette spin.
-     * Mimics CS:GO case: dense at start → sparse at end.
-     * Uses an ease-out curve to space the ~38 ticks.
-     */
     function scheduleRouletteSounds(totalDuration = 6) {
-        const ac = getCtx();
-        if (ac.state === "suspended") ac.resume();
-
+        if (!ctx) return;
         const TICKS = 38;
-
         for (let i = 0; i < TICKS; i++) {
-            const progress = i / TICKS;                      // 0 → 1
-            // ease-out: pack fast at first, slows toward end
+            const progress = i / TICKS;
+            // ease-out: dense at start, sparse at end
             const eased = 1 - Math.pow(1 - progress, 2.4);
-            const t = eased * (totalDuration - 0.15);        // time offset
-
-            // Pitch drops as speed slows (like CSGO)
-            const freq = 1100 - progress * 350;
-
-            scheduleTick(t, freq);
+            const t = eased * (totalDuration - 0.3);
+            const freq = 1100 - progress * 400;
+            tick(t, freq, 0.25);
         }
-
-        // Extra slow ticks at the very end (last 1.5 s)
-        [5.1, 5.35, 5.58, 5.78, 5.93].forEach((t, i) => {
-            scheduleTick(t, 680 - i * 30);
+        // Extra slow taps at very end
+        [5.1, 5.4, 5.65, 5.82, 5.94].forEach((t, i) => {
+            tick(t, 660 - i * 30, 0.2);
         });
-
-        // Winner ding exactly when animation finishes
-        scheduleWinnerDing(totalDuration + 0.05);
+        // Winner bell
+        winnerDing(totalDuration + 0.1);
     }
 
-    return { scheduleRouletteSounds };
+    return { init, scheduleRouletteSounds };
 })();
 
 
@@ -166,6 +147,9 @@ window.openPack = async function(expansionId) {
     const userData = localStorage.getItem("user");
     if (!userData) return;
     const user = JSON.parse(userData);
+
+    // 🔊 Init AudioContext AQUI — sincrono dentro del click handler
+    SoundFX.init();
 
     const modal   = document.getElementById("opening-modal");
     const title   = document.getElementById("opening-title");
