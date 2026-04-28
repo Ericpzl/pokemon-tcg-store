@@ -16,19 +16,18 @@
 - [x] **Fase 12:** Dockerización completa (Frontend Nginx + Backend Java en contenedores)
 - [x] **Fase 13:** Integración de API gratuita TCGdex para importar colecciones
 - [x] **Fase 14:** Panel de Administración para sincronizar colecciones desde TCGdex con nombre y precio personalizados
-
-## Fase en Progreso 🔄
-
-- [ ] **Fase 15:** Despliegue en la Nube
+- [x] **Fase 15:** Despliegue en la Nube
   - [x] Crear `config.js` con URL dinámica (localhost vs producción)
   - [x] Reemplazar todas las llamadas hardcodeadas a `localhost:7070`
-  - [ ] Subir código a GitHub
-  - [ ] Activar GitHub Pages para el Frontend
-  - [ ] Desplegar Backend Java en Render.com
-  - [ ] Conectar base de datos MySQL en la nube (Aiven / Clever Cloud)
-  - [ ] Actualizar `PRODUCTION_API_URL` en `config.js`
+  - [x] Subir código a GitHub
+  - [x] Activar GitHub Pages para el Frontend
+  - [x] Desplegar Backend Java en Render.com
+  - [x] Conectar base de datos MySQL en la nube (Aiven)
+  - [x] Resolver case-sensitivity de tablas MySQL en Linux
+  - [x] Web accesible desde cualquier dispositivo
 
 ## Tareas Pendientes 📋
 
-- [ ] **Fase 16:** Sistema de venta de cartas (Economía / Mercado)
-- [ ] **Fase 17:** Mejoras de UI/UX (Animaciones adicionales, detalles de carta)
+- [ ] **Fase 16:** Sincronizar colecciones en producción desde el panel admin
+- [ ] **Fase 17:** Sistema de venta de cartas (Economía / Mercado)
+- [ ] **Fase 18:** Mejoras de UI/UX (Animaciones adicionales, detalles de carta)
