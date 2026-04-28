@@ -23,7 +23,8 @@ public class DBConnection {
                 + "?useSSL=" + sslParam
                 + "&requireSSL=" + sslParam
                 + "&serverTimezone=UTC"
-                + "&allowPublicKeyRetrieval=true";
+                + "&allowPublicKeyRetrieval=true"
+                + "&connectionCollation=utf8mb4_unicode_ci";
 
         return DriverManager.getConnection(url, user, password);
     }
