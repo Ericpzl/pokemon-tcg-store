@@ -163,8 +163,13 @@ window.openPack = async function(expansionId) {
     track.style.transform  = "translateX(0px)";
     track.innerHTML = "";
     actions.style.display = "none";
-    title.textContent = "Generando Ruleta...";
+    title.textContent = "Preparando sobre...";
     title.style.color = "white";
+
+    // Show spinner, hide roulette
+    document.getElementById("opening-loading").style.display = "flex";
+    document.getElementById("roulette-container").style.display = "none";
+
     modal.style.display = "flex";
 
     try {
@@ -178,6 +183,10 @@ window.openPack = async function(expansionId) {
 
         if (response.ok) {
             title.textContent = "¡Girando!";
+
+            // Hide spinner, show roulette
+            document.getElementById("opening-loading").style.display = "none";
+            document.getElementById("roulette-container").style.display = "flex";
 
             const wonCard  = data.wonCard;
             const allCards = data.allCards;

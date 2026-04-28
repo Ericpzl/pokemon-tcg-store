@@ -55,6 +55,63 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
+        /* Loading spinner */
+        .loading-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 3rem;
+        }
+        .pokeball-spinner {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #e53935 50%, white 50%);
+            border: 4px solid #111;
+            position: relative;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 20px rgba(229,57,53,0.5);
+        }
+        .pokeball-spinner::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 0; right: 0;
+            height: 4px;
+            background: #111;
+            transform: translateY(-50%);
+        }
+        .pokeball-spinner::after {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            background: white;
+            border-radius: 50%;
+            border: 4px solid #111;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+            max-width: 260px;
+            line-height: 1.6;
+        }
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%   { content: ''; }
+            25%  { content: '.'; }
+            50%  { content: '..'; }
+            75%  { content: '...'; }
+            100% { content: ''; }
+        }
+
         /* Modal & Animations */
         .modal-overlay {
             position: fixed;
@@ -162,18 +219,20 @@
 
     <!-- Pack Opening Modal -->
     <div class="modal-overlay" id="opening-modal" style="display: none; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; overflow: hidden;">
-        <h2 id="opening-title" style="color: white; margin-bottom: 2rem; font-size: 2rem; text-shadow: 0 0 10px var(--primary-color); z-index: 2;">Abriendo Sobre...</h2>
-        
-        <div id="roulette-container" style="position: relative; width: 100%; height: 320px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); box-shadow: inset 0 0 50px rgba(0,0,0,1);">
-            
-            <!-- Target line in the center -->
-            <div style="position: absolute; width: 4px; height: 100%; background: var(--error-color); z-index: 10; left: 50%; transform: translateX(-50%); box-shadow: 0 0 15px var(--error-color);"></div>
+        <h2 id="opening-title" style="color: white; margin-bottom: 1.5rem; font-size: 2rem; text-shadow: 0 0 10px var(--primary-color); z-index: 2;">Abriendo Sobre...</h2>
 
-            <!-- The spinning track -->
-            <div id="roulette-track" style="display: flex; gap: 1rem; position: absolute; left: 50%; transform: translateX(0); height: 280px; align-items: center;">
-                <!-- Cards injected via JS -->
-            </div>
-            
+        <!-- Loading state (shown while fetch runs) -->
+        <div id="opening-loading" class="loading-overlay">
+            <div class="pokeball-spinner"></div>
+            <p class="loading-text">
+                Preparando tu sobre<span class="loading-dots"></span><br>
+                <span style="font-size:0.8rem; color: #555; margin-top:0.5rem; display:block;">Si tarda más de 10s, el servidor se estaba despertando. ¡Ya casi!</span>
+            </p>
+        </div>
+        
+        <div id="roulette-container" style="display:none; position: relative; width: 100%; height: 320px; overflow: hidden; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); box-shadow: inset 0 0 50px rgba(0,0,0,1);">
+            <div style="position: absolute; width: 4px; height: 100%; background: var(--error-color); z-index: 10; left: 50%; transform: translateX(-50%); box-shadow: 0 0 15px var(--error-color);"></div>
+            <div id="roulette-track" style="display: flex; gap: 1rem; position: absolute; left: 50%; transform: translateX(0); height: 280px; align-items: center;"></div>
         </div>
 
         <div id="opening-actions" style="display: none; margin-top: 3rem; z-index: 2;">
@@ -184,5 +243,9 @@
 
     <script src="../js/config.js"></script>
     <script src="../js/inventario.js"></script>
+    <script>
+        // Wake up Render server as soon as page loads (avoids cold start delay when opening)
+        fetch(`${API_BASE_URL.replace('/api','')}/`).catch(() => {});
+    </script>
 </body>
 </html>
