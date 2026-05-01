@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (userData) {
         const user = JSON.parse(userData);
         const balanceEl = document.getElementById("nav-user-balance");
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const cart = getCart();
             if (cart.length === 0) return;
 
-            const userData = localStorage.getItem("user");
+            const userData = sessionStorage.getItem("user");
             if (!userData) {
                 alert("Debes iniciar sesión para comprar.");
                 window.location.href = "login.html";
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     // Actualizar saldo del usuario local
                     user.balance = data.newBalance;
-                    localStorage.setItem("user", JSON.stringify(user));
+                    sessionStorage.setItem("user", JSON.stringify(user));
                     
                     const balanceEl = document.getElementById("nav-user-balance");
                     if (balanceEl) {
@@ -77,12 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function getCart() {
-    const raw = localStorage.getItem("pokesobres_cart");
+    const raw = sessionStorage.getItem("pokesobres_cart");
     return raw ? JSON.parse(raw) : [];
 }
 
 function saveCart(cart) {
-    localStorage.setItem("pokesobres_cart", JSON.stringify(cart));
+    sessionStorage.setItem("pokesobres_cart", JSON.stringify(cart));
 }
 
 function renderCart() {

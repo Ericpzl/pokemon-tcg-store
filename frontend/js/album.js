@@ -3,7 +3,7 @@ let currentOpenedCard = null;
 let selectedCards = new Set(); // cardIds seleccionadas para vender
 
 document.addEventListener("DOMContentLoaded", () => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) {
         alert("Debes iniciar sesión para ver tu álbum.");
         window.location.href = "login.html";
@@ -114,7 +114,7 @@ function updateSellBar() {
 async function confirmSell() {
     if (selectedCards.size === 0) return;
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     const cardIds = Array.from(selectedCards);
 
     const total = allCards
@@ -228,7 +228,7 @@ function closeCardModal() {
 }
 
 async function toggleFavorite(cardId) {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     const card = allCards.find(c => c.cardId === cardId);
     if (!card) return;
     card.favorite = !card.favorite;

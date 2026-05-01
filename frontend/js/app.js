@@ -6,7 +6,7 @@ let selectedExpansions = new Set(); // expansion ids selected for bulk add
 let currentModalExpansion = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) {
         alert("Debes iniciar sesión para acceder a la tienda.");
         window.location.href = "login.html";
@@ -183,11 +183,11 @@ window.quickAddToCart = function(expId) {
 };
 
 function _addToCartRaw(id, name, price, coverImage) {
-    let cart = JSON.parse(localStorage.getItem("pokesobres_cart") || "[]");
+    let cart = JSON.parse(sessionStorage.getItem("pokesobres_cart") || "[]");
     const existing = cart.find(item => item.expansionId === id);
     if (existing) { existing.quantity += 1; }
     else { cart.push({ expansionId: id, expansionName: name, unitPrice: price, quantity: 1, coverImage: coverImage }); }
-    localStorage.setItem("pokesobres_cart", JSON.stringify(cart));
+    sessionStorage.setItem("pokesobres_cart", JSON.stringify(cart));
 }
 
 // Keep backward-compat alias
@@ -206,7 +206,7 @@ function showToast(msg) {
 }
 
 function updateCartCounter() {
-    let cart = JSON.parse(localStorage.getItem("pokesobres_cart") || "[]");
+    let cart = JSON.parse(sessionStorage.getItem("pokesobres_cart") || "[]");
     let total = cart.reduce((acc, item) => acc + item.quantity, 0);
     const cartLink = document.getElementById("nav-cart-link");
     if (cartLink) cartLink.textContent = `Carrito (${total})`;
@@ -240,7 +240,7 @@ async function loadRanking() {
 let dailyCountdownInterval = null;
 
 async function checkDailyStatus() {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) return;
     const user = JSON.parse(userData);
     const btn = document.getElementById("btn-claim-daily");
@@ -281,7 +281,7 @@ async function checkDailyStatus() {
 }
 
 window.claimDailyPack = async function() {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(sessionStorage.getItem("user"));
     try {
         const response = await fetch(`${API_BASE_URL}/store/daily-claim`, {
             method: "POST",

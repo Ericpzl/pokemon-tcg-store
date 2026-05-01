@@ -27,6 +27,7 @@ public class Main {
         
         // Endpoints de perfil
         app.post("/api/profile/add_funds", com.pokesobres.controller.ProfileController::addFunds);
+        app.put("/api/profile/update", com.pokesobres.controller.ProfileController::updateProfile);
 
         // Endpoints de inventario
         app.get("/api/inventory/{userId}", com.pokesobres.controller.InventoryController::getInventory);

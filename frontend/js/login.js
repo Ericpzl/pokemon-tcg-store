@@ -20,8 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Guardar datos del usuario en localStorage para mantener sesión
-                    localStorage.setItem("user", JSON.stringify(data));
+                    // Guardar datos del usuario en sessionStorage para mantener sesión
+                    sessionStorage.setItem("user", JSON.stringify(data));
                     alert(`¡Bienvenido de nuevo, ${data.username}!`);
                     window.location.href = "index.html";
                 } else {

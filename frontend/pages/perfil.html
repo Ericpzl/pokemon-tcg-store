@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéSobres - Mi Perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .profile-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 768px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        .profile-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 2rem;
+            height: fit-content;
+        }
+        .profile-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .profile-section h3 {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary-color), #818cf8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto 1.5rem auto;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+        }
+        .user-info-text {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .user-info-text h2 {
+            margin: 0 0 0.5rem 0;
+        }
+        .user-info-text p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-family: inherit;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        .btn-danger:hover {
+            opacity: 0.8;
+        }
+        .message-alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .message-success {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+        .message-error {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+    </style>
+</head>
+<body>
+    <header style="padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+        <h2>PokéSobres <span style="font-size: 1rem; color: var(--text-muted);">| Mi Perfil</span></h2>
+        <nav style="display: flex; gap: 1.5rem; align-items: center;">
+            <a href="index.html">Tienda</a>
+            <a href="cart.html" id="nav-cart-link">Carrito</a>
+            <a href="inventario.html">Inventario</a>
+            <a href="album.html">Álbum</a>
+            <a href="perfil.html" style="color: var(--primary-color); font-weight: bold;">Perfil</a>
+            <span id="nav-user-balance" style="font-weight: bold; color: var(--success-color); border-left: 1px solid var(--glass-border); padding-left: 1.5rem; display: flex; align-items: center;"></span>
+            <a href="add_funds.html" style="background: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; color: white; text-decoration: none; margin-left: 0.5rem; display: flex; align-items: center; justify-content: center; height: 1.5rem;" title="Añadir Saldo">+</a>
+        </nav>
+    </header>
+    
+    <main style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3>Ajustes de Cuenta</h3>
+                <p style="color: var(--text-muted);">Gestiona tu información personal, preferencias y seguridad.</p>
+            </div>
+        </div>
+
+        <div class="profile-container">
+            <!-- Columna Izquierda: Info Resumen y Logout -->
+            <div class="profile-card">
+                <div class="avatar-container" id="profile-avatar">
+                    U
+                </div>
+                <div class="user-info-text">
+                    <h2 id="profile-username">Cargando...</h2>
+                    <p>Miembro de PokéSobres</p>
+                </div>
+                
+                <div style="margin-top: 3rem; text-align: center;">
+                    <button class="btn-danger" onclick="logout()">Cerrar Sesión</button>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 1rem;">Esto cerrará tu sesión en este dispositivo y vaciará tu carrito actual.</p>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Formularios de Actualización -->
+            <div>
+                <!-- Mensajes de respuesta -->
+                <div id="profile-message" class="message-alert"></div>
+
+                <div class="profile-section">
+                    <h3>Información General</h3>
+                    <form id="form-info" onsubmit="updateInfo(event)">
+                        <div class="form-group">
+                            <label>Nombre de Usuario</label>
+                            <input type="text" id="input-username" disabled style="opacity: 0.6; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo Electrónico</label>
+                            <input type="email" id="input-email" required>
+                        </div>
+                        <button type="submit" class="btn">Guardar Información</button>
+                    </form>
+                </div>
+
+                <div class="profile-section">
+                    <h3>Seguridad</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Para cambiar tu contraseña, debes introducir tu contraseña actual por motivos de seguridad.</p>
+                    <form id="form-security" onsubmit="updatePassword(event)">
+                        <div class="form-group">
+                            <label>Contraseña Actual</label>
+                            <input type="password" id="input-current-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nueva Contraseña</label>
+                            <input type="password" id="input-new-password" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirmar Nueva Contraseña</label>
+                            <input type="password" id="input-confirm-password" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn">Cambiar Contraseña</button>
+                    </form>
+                </div>
+                
+                <div class="profile-section" style="opacity: 0.6;">
+                    <h3>Privacidad y Preferencias (Próximamente)</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Pronto podrás configurar tu idioma, zona horaria y preferencias de notificaciones.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/perfil.js"></script>
+</body>
+</html>

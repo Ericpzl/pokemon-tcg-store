@@ -30,5 +30,27 @@ public class ProfileController {
             ctx.status(400).json(Map.of("error", e.getMessage()));
         }
     }
+
+    public static void updateProfile(Context ctx) {
+        try {
+            Map<String, Object> body = mapper.readValue(ctx.body(), new TypeReference<Map<String, Object>>(){});
+            
+            if (!body.containsKey("userId")) {
+                ctx.status(400).json(Map.of("error", "Falta el ID de usuario."));
+                return;
+            }
+
+            int userId = (Integer) body.get("userId");
+            String newEmail = body.containsKey("newEmail") ? (String) body.get("newEmail") : null;
+            String currentPassword = body.containsKey("currentPassword") ? (String) body.get("currentPassword") : null;
+            String newPassword = body.containsKey("newPassword") ? (String) body.get("newPassword") : null;
+
+            com.pokesobres.model.User updatedUser = profileService.updateProfile(userId, currentPassword, newEmail, newPassword);
+            
+            ctx.status(200).json(updatedUser);
+        } catch (Exception e) {
+            ctx.status(400).json(Map.of("error", e.getMessage()));
+        }
+    }
 }
 

@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // Verificar sesión y cargar saldo
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) {
         alert("Debes iniciar sesión para acceder a la tienda de monedas.");
         window.location.href = "login.html";
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function buyTokens(tokenAmount, priceEuro) {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) return;
     const user = JSON.parse(userData);
 
@@ -58,7 +58,7 @@ async function buyTokens(tokenAmount, priceEuro) {
 
             // Actualizar local
             user.balance = data.newBalance;
-            localStorage.setItem("user", JSON.stringify(user));
+            sessionStorage.setItem("user", JSON.stringify(user));
 
             const balanceEl = document.getElementById("nav-user-balance");
             if (balanceEl) {

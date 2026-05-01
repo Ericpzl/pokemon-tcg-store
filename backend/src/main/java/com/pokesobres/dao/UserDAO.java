@@ -148,4 +148,31 @@ public class UserDAO {
             return false;
         }
     }
+
+    public boolean updateProfile(int userId, String newEmail, String newPasswordHash) {
+        String sql;
+        if (newPasswordHash != null && !newPasswordHash.isEmpty()) {
+            sql = "UPDATE Users SET email = ?, password_hash = ? WHERE id = ?";
+        } else {
+            sql = "UPDATE Users SET email = ? WHERE id = ?";
+        }
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, newEmail);
+            if (newPasswordHash != null && !newPasswordHash.isEmpty()) {
+                stmt.setString(2, newPasswordHash);
+                stmt.setInt(3, userId);
+            } else {
+                stmt.setInt(2, userId);
+            }
+            
+            int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Fallo en MySQL (updateProfile): " + e.getMessage());
+        }
+    }
 }

@@ -83,7 +83,7 @@ const SoundFX = (() => {
 //  INVENTORY LOGIC
 // ════════════════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", () => {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) {
         alert("Debes iniciar sesión para ver tu inventario.");
         window.location.href = "login.html";
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const balanceEl = document.getElementById("nav-user-balance");
     if (balanceEl) balanceEl.textContent = `${user.balance} 🪙`;
 
-    const rawCart = localStorage.getItem("pokesobres_cart");
+    const rawCart = sessionStorage.getItem("pokesobres_cart");
     const cart = rawCart ? JSON.parse(rawCart) : [];
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
     const cartLink = document.getElementById("nav-cart-link");
@@ -147,7 +147,7 @@ async function loadInventory(userId) {
 }
 
 window.openPack = async function(expansionId) {
-    const userData = localStorage.getItem("user");
+    const userData = sessionStorage.getItem("user");
     if (!userData) return;
     const user = JSON.parse(userData);
 
