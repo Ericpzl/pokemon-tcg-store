@@ -24,6 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (navCartLink) {
         navCartLink.textContent = `Carrito (${cart.length})`;
     }
+
+    // Mostrar sección de admin si corresponde
+    if (user.role && user.role.toLowerCase() === "admin") {
+        const adminSection = document.getElementById("admin-section");
+        if (adminSection) {
+            adminSection.style.display = "block";
+        }
+    }
 });
 
 function showMessage(msg, isError = false) {

@@ -78,6 +78,17 @@
 
     <script src="../js/config.js"></script>
     <script>
+        // Verificación de seguridad
+        const userData = sessionStorage.getItem("user");
+        if (!userData) {
+            window.location.href = "login.html";
+        } else {
+            const user = JSON.parse(userData);
+            if (!user.role || user.role.toLowerCase() !== "admin") {
+                window.location.href = "index.html";
+            }
+        }
+
         async function syncCollection() {
             const collectionId = document.getElementById('scrydex-collection-id').value;
             const customName = document.getElementById('custom-pack-name').value;
