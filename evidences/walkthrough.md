@@ -21,6 +21,7 @@ const PRODUCTION_API_URL = "https://pokemon-tcg-store.onrender.com/api";
 const LOCAL_API_URL = "http://localhost:7070/api";
 const API_BASE_URL = isLocalhost ? LOCAL_API_URL : PRODUCTION_API_URL;
 ```
+Pagina para las expansiones = https://api.tcgdex.net/v2/es/sets
 
 ### 1.2 Reemplazar todas las URLs hardcodeadas
 Todos los `fetch("http://localhost:7070/api/...")` de los archivos JS fueron reemplazados por `fetch(`${API_BASE_URL}/...`)`.
