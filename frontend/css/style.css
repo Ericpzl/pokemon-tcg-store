@@ -12,6 +12,18 @@
     --glass-border: rgba(255, 255, 255, 0.08);
 }
 
+/* Light Theme Variables */
+body.light-theme {
+    --bg-primary: #f0f4f8;
+    --bg-secondary: #ffffff;
+    --accent-color: #4f46e5;
+    --accent-hover: #4338ca;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
