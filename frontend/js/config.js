@@ -41,7 +41,7 @@ window.toggleTheme = function() {
     
     const btns = document.querySelectorAll('.theme-toggle-btn');
     btns.forEach(btn => {
-        btn.textContent = isLight ? '??' : '??';
+        btn.textContent = isLight ? '🌙' : '🌞';
     });
 };
 
@@ -49,6 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const isLight = document.body.classList.contains('light-theme');
     const btns = document.querySelectorAll('.theme-toggle-btn');
     btns.forEach(btn => {
-        btn.textContent = isLight ? '??' : '??';
+        btn.textContent = isLight ? '🌙' : '🌞';
     });
 });
