@@ -5,8 +5,8 @@ let selectedCards = new Set(); // cardIds seleccionadas para vender
 document.addEventListener("DOMContentLoaded", () => {
     const userData = sessionStorage.getItem("user");
     if (!userData) {
-        alert("Debes iniciar sesión para ver tu álbum.");
-        window.location.href = "login.html";
+        showToast("Debes iniciar sesión para ver tu álbum.", "error");
+        setTimeout(() => window.location.href = "login.html", 1500);
         return;
     }
 
@@ -143,19 +143,15 @@ async function confirmSell() {
             // Update nav balance if possible
             if (window.updateNavBalance) window.updateNavBalance();
         } else {
-            alert("Error al vender: " + (data.error || "Error desconocido"));
+            showToast("Error al vender: " + (data.error || "Error desconocido"), "error");
         }
     } catch (err) {
-        alert("Error de conexión al vender.");
+        showToast("Error de conexión al vender.", "error");
     }
 }
 
 function showSellSuccess(earned) {
-    const toast = document.createElement("div");
-    toast.className = "sell-toast";
-    toast.innerHTML = `✅ ¡Vendido! +${earned.toFixed(0)}🪙`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    showToast(`✅ ¡Vendido! +${earned.toFixed(0)}🪙`, "success");
 }
 
 function cancelSell() {

@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+  # 1. NUEVO CONTENEDOR: Base de Datos 100% aislada
+  db:
+    image: mysql:8.0 # O la versión exacta que uses en producción
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: pokemon_tcg_db # Cambia esto por el nombre real de tu BD
+      MYSQL_ROOT_PASSWORD: root # Contraseña local (usa la que quieras)
+    volumes:
+      # Persistencia de datos (para no perderlos si apagas el contenedor)
+      - db_data:/var/lib/mysql
+      # AQUÍ ESTÁ LA MAGIA: Mapeamos tu archivo .sql con los datos de producción
+      # Docker leerá este archivo y creará las tablas y datos automáticamente al arrancar
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -8,11 +24,14 @@ services:
     ports:
       - "7070:7070"
     environment:
-      # Usamos host.docker.internal para que Docker pueda ver el MySQL de tu ordenador
-      - DB_HOST=host.docker.internal
-    # Esto es necesario para Windows/Mac para resolver host.docker.internal
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      # Ahora el backend apunta al contenedor 'db', no a tu ordenador
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=pokemon_tcg_db
+      - DB_USER=root
+      - DB_PASS=root
+    depends_on:
+      - db # Espera a que la base de datos exista antes de arrancar
 
   frontend:
     build:
@@ -22,3 +41,7 @@ services:
       - "80:80"
     depends_on:
       - backend
+
+# Declaramos el volumen para la base de datos
+volumes:
+  db_data:

@@ -8,3 +8,21 @@ const PRODUCTION_API_URL = "https://pokemon-tcg-store.onrender.com/api";
 const LOCAL_API_URL = "http://localhost:7070/api";
 
 const API_BASE_URL = isLocalhost ? LOCAL_API_URL : PRODUCTION_API_URL;
+
+// Sistema de Notificaciones (Toasts) global
+window.showToast = function(msg, type = 'info') {
+    const t = document.createElement("div");
+    t.className = `custom-toast toast-${type}`;
+    t.innerHTML = msg; 
+    
+    document.body.appendChild(t);
+    
+    requestAnimationFrame(() => {
+        t.classList.add("show");
+    });
+
+    setTimeout(() => {
+        t.classList.remove("show");
+        setTimeout(() => t.remove(), 300); 
+    }, 3000);
+}

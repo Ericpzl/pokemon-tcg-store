@@ -18,8 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const userData = sessionStorage.getItem("user");
             if (!userData) {
-                alert("Debes iniciar sesión para comprar.");
-                window.location.href = "login.html";
+                showToast("Debes iniciar sesión para comprar.", "error");
+                setTimeout(() => window.location.href = "login.html", 1500);
                 return;
             }
 
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert("¡Compra realizada con éxito!");
+                    showToast("¡Compra realizada con éxito!", "success");
                     
                     // Actualizar saldo del usuario local
                     user.balance = data.newBalance;
@@ -61,13 +61,13 @@ document.addEventListener("DOMContentLoaded", () => {
                         updateCartCounter();
                     }
                 } else {
-                    alert("Error en la compra: " + (data.error || "Desconocido"));
+                    showToast("Error en la compra: " + (data.error || "Desconocido"), "error");
                 }
                 
                 checkoutBtn.textContent = originalText;
             } catch (error) {
                 console.error("Error al procesar compra:", error);
-                alert("Error de conexión al procesar la compra.");
+                showToast("Error de conexión al procesar la compra.", "error");
                 checkoutBtn.textContent = "Finalizar Compra";
             } finally {
                 checkoutBtn.disabled = false;

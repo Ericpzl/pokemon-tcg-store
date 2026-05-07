@@ -2,8 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Verificar sesión y cargar saldo
     const userData = sessionStorage.getItem("user");
     if (!userData) {
-        alert("Debes iniciar sesión para acceder a la tienda de monedas.");
-        window.location.href = "login.html";
+        showToast("Debes iniciar sesión para acceder a la tienda de monedas.", "error");
+        setTimeout(() => window.location.href = "login.html", 1500);
         return;
     }
 

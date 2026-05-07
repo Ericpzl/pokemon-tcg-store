@@ -22,14 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                     // Guardar datos del usuario en sessionStorage para mantener sesión
                     sessionStorage.setItem("user", JSON.stringify(data));
-                    alert(`¡Bienvenido de nuevo, ${data.username}!`);
-                    window.location.href = "index.html";
+                    showToast(`¡Bienvenido de nuevo, ${data.username}!`, "success");
+                    setTimeout(() => window.location.href = "index.html", 1000);
                 } else {
-                    alert("Error al iniciar sesión: " + (data.error || "Algo salió mal."));
+                    showToast("Error al iniciar sesión: " + (data.error || "Algo salió mal."), "error");
                 }
             } catch (error) {
                 console.error("Error connecting to server:", error);
-                alert("Error de conexión con el servidor.");
+                showToast("Error de conexión con el servidor.", "error");
             }
         });
     }

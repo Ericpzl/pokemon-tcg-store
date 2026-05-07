@@ -5,12 +5,17 @@ import com.pokesobres.dao.PackInventoryDAO;
 import com.pokesobres.dao.UserDAO;
 import com.pokesobres.model.Card;
 import com.pokesobres.model.User;
+import com.pokesobres.dao.ExpansionDAO;
+import com.pokesobres.model.Expansion;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.Random;
 
 public class DailyRewardService {
     private UserDAO userDAO = new UserDAO();
     private CardDAO cardDAO = new CardDAO();
     private PackInventoryDAO packDAO = new PackInventoryDAO();
+    private ExpansionDAO expansionDAO = new ExpansionDAO();
 
     public long getMsUntilNextDaily(int userId) {
         User user = userDAO.findById(userId);
@@ -42,12 +47,21 @@ public class DailyRewardService {
             throw new RuntimeException("Todavía no han pasado 24 horas.");
         }
 
-        // Añadir el Sobre Diario (ID 999) al inventario del usuario
-        packDAO.addPacks(userId, 999, 1);
+        List<Expansion> expansions = expansionDAO.findAll();
+        if (expansions == null || expansions.isEmpty()) {
+            throw new RuntimeException("No hay expansiones disponibles.");
+        }
+
+        Random rand = new Random();
+        Expansion randomExp = expansions.get(rand.nextInt(expansions.size()));
+
+        // Añadir el Sobre aleatorio al inventario del usuario
+        packDAO.addPacks(userId, randomExp.getId(), 1);
 
         // Update last free pack date
         userDAO.updateLastFreePackDate(userId, new Timestamp(System.currentTimeMillis()));
 
-        return new com.pokesobres.model.Card(0, 999, "Sobre Diario", "", "", 0, "", 0.0);
+        // Retornamos un objeto indicando qué sobre ha tocado
+        return new com.pokesobres.model.Card(0, randomExp.getId(), randomExp.getName(), "", "", 0, "", 0.0);
     }
 }

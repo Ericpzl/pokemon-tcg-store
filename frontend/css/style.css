@@ -151,3 +151,43 @@ a:hover {
     padding: 0;
     margin-top: 1rem;
 }
+/* ==========================================================================
+   TOAST NOTIFICATIONS
+   ========================================================================== */
+.custom-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none; /* Para que no interfiera si haces clic rápido */
+    font-family: 'Inter', sans-serif;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Estado visible (animación) */
+.custom-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Tipos de notificaciones */
+.toast-info {
+    background-color: #3b82f6; /* Azul tipo carrito */
+}
+
+.toast-success {
+    background-color: #10b981; /* Verde éxito */
+}
+
+.toast-error {
+    background-color: #ef4444; /* Rojo error */
+}

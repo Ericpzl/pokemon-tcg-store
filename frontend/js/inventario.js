@@ -85,8 +85,8 @@ const SoundFX = (() => {
 document.addEventListener("DOMContentLoaded", () => {
     const userData = sessionStorage.getItem("user");
     if (!userData) {
-        alert("Debes iniciar sesión para ver tu inventario.");
-        window.location.href = "login.html";
+        showToast("Debes iniciar sesión para ver tu inventario.", "error");
+        setTimeout(() => window.location.href = "login.html", 1500);
         return;
     }
 
@@ -244,12 +244,12 @@ window.openPack = async function(expansionId) {
         } else {
             title.textContent = "Error";
             title.style.color = "var(--error-color)";
-            alert(data.error || "No se pudo abrir el sobre.");
+            showToast(data.error || "No se pudo abrir el sobre.", "error");
             closeOpeningModal();
         }
     } catch (error) {
         console.error(error);
-        alert("Error de conexión al abrir el sobre.");
+        showToast("Error de conexión al abrir el sobre.", "error");
         closeOpeningModal();
     }
 };

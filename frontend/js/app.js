@@ -8,8 +8,13 @@ let currentModalExpansion = null;
 document.addEventListener("DOMContentLoaded", () => {
     const userData = sessionStorage.getItem("user");
     if (!userData) {
-        alert("Debes iniciar sesión para acceder a la tienda.");
-        window.location.href = "login.html";
+        // Usamos el nuevo toast de error en lugar del alert
+        showToast("⚠️ Debes iniciar sesión para acceder a la tienda.", "error");
+        
+        // Retrasamos la redirección para que el usuario pueda leer el mensaje
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 2500);
         return;
     }
 
@@ -160,6 +165,7 @@ window.addSelectionToCart = function() {
         const exp = allExpansions.find(e => e.id === expId);
         if (exp) _addToCartRaw(exp.id, exp.name, exp.packPrice, exp.coverImage);
     });
+    // Llamada original que ahora usará el tipo 'info' por defecto
     showToast(`✅ ${selectedExpansions.size} sobre(s) añadido(s) al carrito`);
     selectedExpansions.clear();
     renderExpansions();
@@ -178,6 +184,7 @@ window.quickAddToCart = function(expId) {
     const exp = allExpansions.find(e => e.id === expId);
     if (!exp) return;
     _addToCartRaw(exp.id, exp.name, exp.packPrice, exp.coverImage);
+    // Llamada original que ahora usará el tipo 'info' por defecto
     showToast(`🛒 "${exp.name}" añadido al carrito`);
     updateCartCounter();
 };
@@ -197,13 +204,8 @@ window.addToCart = function(id, name, price, coverImage) {
     updateCartCounter();
 };
 
-function showToast(msg) {
-    const t = document.createElement("div");
-    t.className = "cart-toast";
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2500);
-}
+// ──────────────────────────────────────────────────────────────
+// El sistema de Notificaciones (Toasts) ahora se encuentra globalmente en config.js
 
 function updateCartCounter() {
     let cart = JSON.parse(sessionStorage.getItem("pokesobres_cart") || "[]");
@@ -290,10 +292,15 @@ window.claimDailyPack = async function() {
         });
         const data = await response.json();
         if (response.ok) {
-            alert("¡Sobre reclamado con éxito! Ve a tu Inventario para abrirlo.");
+            const packName = data.wonCard ? data.wonCard.name : "Diario";
+            showToast(`🎁 ¡Sobre "${packName}" reclamado con éxito! Ve a tu Inventario.`, "success");
             checkDailyStatus();
         } else {
-            alert(data.error);
+            // Toast de error devuelto por la API
+            showToast(`❌ ${data.error}`, "error");
         }
-    } catch { alert("Error al reclamar el sobre."); }
+    } catch { 
+        // Toast de error de conexión
+        showToast("❌ Error al reclamar el sobre.", "error"); 
+    }
 };

@@ -21,14 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert("¡Registro exitoso! Ya puedes iniciar sesión.");
-                    window.location.href = "login.html";
+                    showToast("¡Registro exitoso! Ya puedes iniciar sesión.", "success");
+                    setTimeout(() => window.location.href = "login.html", 1500);
                 } else {
-                    alert("Error en el registro: " + (data.error || "Algo salió mal."));
+                    showToast("Error en el registro: " + (data.error || "Algo salió mal."), "error");
                 }
             } catch (error) {
                 console.error("Error connecting to server:", error);
-                alert("Error de conexión con el servidor.");
+                showToast("Error de conexión con el servidor.", "error");
             }
         });
     }
