@@ -25,10 +25,10 @@ window.showToast = function(msg, type = 'info') {
         t.classList.remove("show");
         setTimeout(() => t.remove(), 300); 
     }, 3000);
-}
+};
 
 // Theme Initialization
-(function initTheme() {
+;(function initTheme() {
     const theme = localStorage.getItem('theme') || 'dark';
     if (theme === 'light') {
         document.body.classList.add('light-theme');
