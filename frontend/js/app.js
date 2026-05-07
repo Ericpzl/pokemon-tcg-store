@@ -44,6 +44,8 @@ async function loadExpansions() {
 
 function renderExpansions() {
     const storeContainer = document.getElementById("store-container");
+    if (!storeContainer) return;
+    
     storeContainer.innerHTML = "";
 
     if (allExpansions.length === 0) {

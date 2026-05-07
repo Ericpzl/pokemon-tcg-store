@@ -1,5 +1,5 @@
 let allCards = [];
-let allExpansions = [];
+let albumExpansions = [];
 let currentOpenedCard = null;
 let selectedCards = new Set(); // cardIds seleccionadas para vender
 
@@ -22,9 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadAlbum(userId) {
     try {
-        if (allExpansions.length === 0) {
+        if (albumExpansions.length === 0) {
             const expRes = await fetch(`${API_BASE_URL}/expansions`);
-            if (expRes.ok) allExpansions = await expRes.json();
+            if (expRes.ok) albumExpansions = await expRes.json();
         }
 
         const response = await fetch(`${API_BASE_URL}/album/${userId}`);
@@ -199,7 +199,7 @@ function openCardModal(card) {
     document.getElementById("modal-rarity").textContent = card.rarity;
     document.getElementById("modal-type").textContent = card.type;
     
-    const expName = allExpansions.find(e => e.id === card.expansionId)?.name || "Desconocida";
+    const expName = albumExpansions.find(e => e.id === card.expansionId)?.name || "Desconocida";
     document.getElementById("modal-expansion").textContent = expName;
     
     document.getElementById("modal-hp").textContent = card.hp;
