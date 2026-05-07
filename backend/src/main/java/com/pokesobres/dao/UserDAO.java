@@ -127,6 +127,7 @@ public class UserDAO {
         user.setBalance(rs.getInt("balance"));
         user.setLanguage(rs.getString("language"));
         user.setRole(rs.getString("role"));
+        user.setAvatarUrl(rs.getString("avatar_url"));
         
         Timestamp lastFree = rs.getTimestamp("last_free_pack_date");
         if (lastFree != null) {
@@ -149,12 +150,12 @@ public class UserDAO {
         }
     }
 
-    public boolean updateProfile(int userId, String newEmail, String newPasswordHash) {
+    public boolean updateProfile(int userId, String newEmail, String newPasswordHash, String newAvatarUrl) {
         String sql;
         if (newPasswordHash != null && !newPasswordHash.isEmpty()) {
-            sql = "UPDATE Users SET email = ?, password_hash = ? WHERE id = ?";
+            sql = "UPDATE Users SET email = ?, password_hash = ?, avatar_url = ? WHERE id = ?";
         } else {
-            sql = "UPDATE Users SET email = ? WHERE id = ?";
+            sql = "UPDATE Users SET email = ?, avatar_url = ? WHERE id = ?";
         }
         
         try (Connection conn = DBConnection.getConnection();
@@ -163,9 +164,11 @@ public class UserDAO {
             stmt.setString(1, newEmail);
             if (newPasswordHash != null && !newPasswordHash.isEmpty()) {
                 stmt.setString(2, newPasswordHash);
-                stmt.setInt(3, userId);
+                stmt.setString(3, newAvatarUrl);
+                stmt.setInt(4, userId);
             } else {
-                stmt.setInt(2, userId);
+                stmt.setString(2, newAvatarUrl);
+                stmt.setInt(3, userId);
             }
             
             int affectedRows = stmt.executeUpdate();

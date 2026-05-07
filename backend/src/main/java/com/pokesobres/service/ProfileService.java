@@ -25,7 +25,7 @@ public class ProfileService {
         return newBalance;
     }
 
-    public User updateProfile(int userId, String currentPassword, String newEmail, String newPassword) throws Exception {
+    public User updateProfile(int userId, String currentPassword, String newEmail, String newPassword, String newAvatarUrl) throws Exception {
         User user = userDAO.findById(userId);
         if (user == null) {
             throw new Exception("Usuario no encontrado.");
@@ -52,13 +52,15 @@ public class ProfileService {
         }
 
         String finalEmail = newEmail != null && !newEmail.isEmpty() ? newEmail : user.getEmail();
+        String finalAvatar = newAvatarUrl != null ? newAvatarUrl : user.getAvatarUrl();
 
-        if (!userDAO.updateProfile(userId, finalEmail, newHash)) {
+        if (!userDAO.updateProfile(userId, finalEmail, newHash, finalAvatar)) {
             throw new Exception("Error al actualizar el perfil.");
         }
 
         // Devolver el usuario actualizado
         user.setEmail(finalEmail);
+        user.setAvatarUrl(finalAvatar);
         if (newHash != null) {
             user.setPasswordHash(newHash);
         }

@@ -12,7 +12,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Cargar datos en el perfil
     document.getElementById("profile-username").textContent = user.username;
-    document.getElementById("profile-avatar").textContent = user.username.charAt(0).toUpperCase();
+    
+    if (user.avatarUrl) {
+        document.getElementById("profile-avatar").innerHTML = `<img src="${user.avatarUrl}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        document.getElementById("input-avatar").value = user.avatarUrl;
+    } else {
+        document.getElementById("profile-avatar").textContent = user.username.charAt(0).toUpperCase();
+    }
     
     // Cargar en el formulario
     document.getElementById("input-username").value = user.username;
@@ -35,14 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function showMessage(msg, isError = false) {
-    const msgBox = document.getElementById("profile-message");
-    msgBox.textContent = msg;
-    msgBox.className = "message-alert " + (isError ? "message-error" : "message-success");
-    msgBox.style.display = "block";
-    
-    setTimeout(() => {
-        msgBox.style.display = "none";
-    }, 5000);
+    showToast(msg, isError ? "error" : "success");
 }
 
 async function updateInfo(event) {
@@ -50,9 +49,10 @@ async function updateInfo(event) {
     
     const user = JSON.parse(sessionStorage.getItem("user"));
     const newEmail = document.getElementById("input-email").value;
+    const newAvatar = document.getElementById("input-avatar").value;
 
-    if (newEmail === user.email) {
-        showMessage("El correo electrónico es el mismo que el actual.", true);
+    if (newEmail === user.email && newAvatar === (user.avatarUrl || "")) {
+        showMessage("No hay cambios que guardar.", true);
         return;
     }
 
@@ -62,7 +62,8 @@ async function updateInfo(event) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 userId: user.id,
-                newEmail: newEmail
+                newEmail: newEmail,
+                newAvatarUrl: newAvatar
             })
         });
 
@@ -71,11 +72,17 @@ async function updateInfo(event) {
             throw new Error(data.error || "Error al actualizar la información.");
         }
 
-        // Actualizar sesión local
-        user.email = newEmail;
+        // Actualizar sesión local con los nuevos datos
+        user.email = data.email || newEmail;
+        user.avatarUrl = data.avatarUrl || newAvatar;
         sessionStorage.setItem("user", JSON.stringify(user));
         
         showMessage("Información actualizada con éxito.");
+        
+        // Refrescar el avatar en la UI si cambió
+        if (user.avatarUrl) {
+            document.getElementById("profile-avatar").innerHTML = `<img src="${user.avatarUrl}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        }
     } catch (error) {
         showMessage(error.message, true);
     }
@@ -125,4 +132,30 @@ async function updatePassword(event) {
 function logout() {
     sessionStorage.clear();
     window.location.href = "login.html";
+}
+
+async function resetDatabase() {
+    if (!confirm("⚠️ ¡ADVERTENCIA CRÍTICA!\n\nEsto borrará a TODOS los usuarios (excepto admins), sus transacciones, inventarios y álbumes.\nLas cartas y expansiones NO se borrarán.\n\n¿Estás completamente seguro de que quieres limpiar la base de datos?")) {
+        return;
+    }
+    
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/admin/reset-db`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showToast("✅ " + data.message, "success");
+        } else {
+            showToast("❌ " + data.error, "error");
+        }
+    } catch (err) {
+        showToast("❌ Error al contactar con el servidor.", "error");
+    }
 }

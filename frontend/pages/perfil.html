@@ -170,6 +170,10 @@
                             <label>Correo Electrónico</label>
                             <input type="email" id="input-email" required>
                         </div>
+                        <div class="form-group">
+                            <label>URL de Foto de Perfil (Opcional)</label>
+                            <input type="url" id="input-avatar" placeholder="https://ejemplo.com/mifoto.jpg">
+                        </div>
                         <button type="submit" class="btn">Guardar Información</button>
                     </form>
                 </div>
@@ -177,7 +181,8 @@
                 <div class="profile-section" id="admin-section" style="display: none; border-color: var(--warning-color); box-shadow: 0 0 15px rgba(240, 165, 0, 0.2);">
                     <h3 style="color: var(--warning-color);">👑 Panel de Administración</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Como administrador, tienes acceso a herramientas exclusivas para gestionar la tienda.</p>
-                    <button class="btn" style="background: linear-gradient(135deg, var(--warning-color), #d4a017); color: black; font-weight: bold; width: 100%;" onclick="window.location.href='admin.html'">Ir al Panel Secreto (Añadir Sobres)</button>
+                    <button class="btn" style="background: linear-gradient(135deg, var(--warning-color), #d4a017); color: black; font-weight: bold; width: 100%; margin-bottom: 1rem;" onclick="window.location.href='admin.html'">Ir al Panel Secreto (Añadir Sobres)</button>
+                    <button class="btn-danger" onclick="resetDatabase()">Resetear Base de Datos (Borrar Usuarios)</button>
                 </div>
 
                 <div class="profile-section">

@@ -44,8 +44,9 @@ public class ProfileController {
             String newEmail = body.containsKey("newEmail") ? (String) body.get("newEmail") : null;
             String currentPassword = body.containsKey("currentPassword") ? (String) body.get("currentPassword") : null;
             String newPassword = body.containsKey("newPassword") ? (String) body.get("newPassword") : null;
+            String newAvatarUrl = body.containsKey("newAvatarUrl") ? (String) body.get("newAvatarUrl") : null;
 
-            com.pokesobres.model.User updatedUser = profileService.updateProfile(userId, currentPassword, newEmail, newPassword);
+            com.pokesobres.model.User updatedUser = profileService.updateProfile(userId, currentPassword, newEmail, newPassword, newAvatarUrl);
             
             ctx.status(200).json(updatedUser);
         } catch (Exception e) {
