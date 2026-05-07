@@ -120,6 +120,17 @@ window.openPackModal = function(expId) {
     const descIdx = exp.id % PACK_DESCRIPTIONS.length;
     document.getElementById("modal-pack-desc").textContent = PACK_DESCRIPTIONS[descIdx];
 
+    const pack3d = document.getElementById("modal-pack-3d");
+    if (pack3d) {
+        pack3d.classList.remove("spin-in");
+        void pack3d.offsetWidth; // trigger reflow para reiniciar la animación
+        pack3d.classList.add("spin-in");
+        
+        setTimeout(() => {
+            pack3d.classList.remove("spin-in");
+        }, 900);
+    }
+
     document.getElementById("pack-modal").style.display = "flex";
 };
 
