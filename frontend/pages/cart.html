@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <header style="padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+    <header style="padding: 1.5rem 2rem; background: var(--bg-secondary); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <h2>PokéSobres <span style="font-size: 1rem; color: var(--text-muted);">| Carrito</span></h2>
-        <nav style="display: flex; gap: 1.5rem;">
-            <a href="index.html">Volver a la Tienda</a>
+        <nav style="display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+            <a href="index.html" style="display: flex; align-items: center;">Volver a la Tienda</a>
             <span id="nav-user-balance" style="font-weight: bold; color: var(--success-color); border-left: 1px solid var(--glass-border); padding-left: 1.5rem; display: flex; align-items: center;"></span>
-            <a href="add_funds.html" style="font-size: 1.8rem; text-decoration: none; transition: transform 0.2s; display: inline-block; margin-left: 0.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: pointer;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Añadir Monedas">💎</a>
-            <button onclick="toggleTheme()" class="theme-toggle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; margin-left: 0.5rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Cambiar Tema">🌞</button>
+            <a href="add_funds.html" style="font-size: 1.8rem; text-decoration: none; transition: transform 0.2s; display: inline-block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: pointer;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Añadir Monedas">💎</a>
+            <button onclick="toggleTheme()" class="theme-toggle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Cambiar Tema">🌞</button>
         </nav>
     </header>
     <main style="padding: 2rem; max-width: 1000px; margin: 0 auto;">
@@ -41,14 +41,42 @@
             </div>
         </div>
 
-        <div style="margin-top: 2rem; background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 1.25rem;">
-                <span style="color: var(--text-muted);">Total estimado: </span>
-                <span style="font-weight: bold; color: var(--success-color);" id="cart-total">0 🪙</span>
+        <div style="margin-top: 2rem; background: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 1.5rem;">
+            <div style="display: flex; gap: 1rem; align-items: center; justify-content: flex-end;">
+                <input type="text" id="discount-code" placeholder="Código de descuento" style="padding: 0.8rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-color); color: var(--text-color); width: 250px;">
+                <button class="btn" style="width: auto; padding: 0.8rem 1.5rem; background: var(--glass-border); color: var(--text-color);" id="apply-discount-btn" onclick="applyDiscount()">Aplicar</button>
             </div>
-            <button class="btn" style="width: auto; padding: 1rem 3rem;" id="checkout-btn">Confirmar Compra</button>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+                <div style="font-size: 1.25rem;">
+                    <span style="color: var(--text-muted);">Total estimado: </span>
+                    <span style="font-weight: bold; color: var(--success-color);" id="cart-total">0 🪙</span>
+                    <div id="discount-msg" style="color: #2ecc71; font-size: 0.9rem; margin-top: 0.5rem; display: none;">✅ Código aplicado: ¡Compra gratis!</div>
+                </div>
+                <button class="btn" style="width: auto; padding: 1rem 3rem;" id="checkout-btn" onclick="showCheckoutConfirm()">Confirmar Compra</button>
+            </div>
         </div>
     </main>
+
+    <!-- Modal de Confirmación de Compra -->
+    <div class="card-modal-overlay" id="checkout-confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 3000; display: none; justify-content: center; align-items: center;">
+        <div style="background: var(--bg-secondary); border: 1px solid var(--glass-border); border-radius: 20px; padding: 2.5rem; max-width: 400px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; box-shadow: 0 20px 50px rgba(0,0,0,0.8); animation: modalPopIn 0.3s ease-out;">
+            <div style="font-size: 3rem; background: rgba(46, 204, 113, 0.2); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2ecc71; box-shadow: 0 0 20px rgba(46,204,113,0.4);">🛒</div>
+            <h2 style="font-size: 1.8rem; margin: 0;">Confirmar Pago</h2>
+            <p id="checkout-confirm-text" style="color: var(--text-muted); font-size: 1.1rem; margin: 0; line-height: 1.5;"></p>
+            <div style="display: flex; gap: 1rem; width: 100%; margin-top: 1rem;">
+                <button style="flex: 1; background: transparent; color: var(--text-muted); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 10px; cursor: pointer; font-size: 1rem;" onclick="closeCheckoutConfirm()">Cancelar</button>
+                <button style="flex: 1; background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; border: none; padding: 1rem; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: opacity 0.2s;" id="checkout-confirm-yes" onclick="executePurchase()">Sí, Pagar</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes modalPopIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
 
     <script src="../js/config.js"></script>
     <script src="../js/cart.js"></script>

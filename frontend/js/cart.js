@@ -1,3 +1,5 @@
+let discountApplied = false;
+
 document.addEventListener("DOMContentLoaded", () => {
     const userData = sessionStorage.getItem("user");
     if (userData) {
@@ -9,72 +11,113 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     renderCart();
-
-    const checkoutBtn = document.getElementById("checkout-btn");
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener("click", async () => {
-            const cart = getCart();
-            if (cart.length === 0) return;
-
-            const userData = sessionStorage.getItem("user");
-            if (!userData) {
-                showToast("Debes iniciar sesión para comprar.", "error");
-                setTimeout(() => window.location.href = "login.html", 1500);
-                return;
-            }
-
-            const user = JSON.parse(userData);
-            
-            try {
-                checkoutBtn.disabled = true;
-                const originalText = checkoutBtn.textContent;
-                checkoutBtn.textContent = "Procesando...";
-
-                const response = await fetch(`${API_BASE_URL}/purchase`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        userId: user.id,
-                        cart: cart
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showToast("¡Compra realizada con éxito!", "success");
-                    
-                    // Actualizar saldo del usuario local
-                    user.balance = data.newBalance;
-                    sessionStorage.setItem("user", JSON.stringify(user));
-                    
-                    const balanceEl = document.getElementById("nav-user-balance");
-                    if (balanceEl) {
-                        balanceEl.textContent = `${user.balance} 🪙`;
-                    }
-                    
-                    // Vaciar carrito
-                    saveCart([]);
-                    renderCart();
-                    
-                    if (typeof updateCartCounter === "function") {
-                        updateCartCounter();
-                    }
-                } else {
-                    showToast("Error en la compra: " + (data.error || "Desconocido"), "error");
-                }
-                
-                checkoutBtn.textContent = originalText;
-            } catch (error) {
-                console.error("Error al procesar compra:", error);
-                showToast("Error de conexión al procesar la compra.", "error");
-                checkoutBtn.textContent = "Finalizar Compra";
-            } finally {
-                checkoutBtn.disabled = false;
-            }
-        });
-    }
 });
+
+function applyDiscount() {
+    const code = document.getElementById("discount-code").value.trim().toLowerCase();
+    if (code === "proyectofinal2026") {
+        discountApplied = true;
+        document.getElementById("discount-msg").style.display = "block";
+        document.getElementById("discount-code").disabled = true;
+        document.getElementById("apply-discount-btn").disabled = true;
+        showToast("¡Código aplicado correctamente! Tu primera compra es gratis.", "success");
+        renderCart();
+    } else {
+        showToast("Código no válido.", "error");
+    }
+}
+
+function showCheckoutConfirm() {
+    const cart = getCart();
+    if (cart.length === 0) return;
+
+    let total = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    if (discountApplied) total = 0;
+
+    const msg = `¿Estás seguro de que deseas confirmar esta compra por un total de <b style="color:var(--success-color);">${total} 🪙</b>?`;
+    document.getElementById("checkout-confirm-text").innerHTML = msg;
+    document.getElementById("checkout-confirm-modal").style.display = "flex";
+}
+
+function closeCheckoutConfirm() {
+    document.getElementById("checkout-confirm-modal").style.display = "none";
+}
+
+async function executePurchase() {
+    const cart = getCart();
+    if (cart.length === 0) return;
+
+    const userData = sessionStorage.getItem("user");
+    if (!userData) {
+        showToast("Debes iniciar sesión para comprar.", "error");
+        setTimeout(() => window.location.href = "login.html", 1500);
+        return;
+    }
+
+    const user = JSON.parse(userData);
+    
+    // Si hay descuento, ponemos el precio a 0 en la petición
+    const payloadCart = cart.map(item => {
+        if (discountApplied) {
+            return { ...item, unitPrice: 0, subtotal: 0 };
+        }
+        return item;
+    });
+
+    try {
+        closeCheckoutConfirm();
+        const checkoutBtn = document.getElementById("checkout-btn");
+        checkoutBtn.disabled = true;
+        const originalText = checkoutBtn.textContent;
+        checkoutBtn.textContent = "Procesando...";
+
+        const response = await fetch(`${API_BASE_URL}/purchase`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                userId: user.id,
+                cart: payloadCart
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            showToast("¡Compra realizada con éxito!", "success");
+            
+            user.balance = data.newBalance;
+            sessionStorage.setItem("user", JSON.stringify(user));
+            
+            const balanceEl = document.getElementById("nav-user-balance");
+            if (balanceEl) balanceEl.textContent = `${user.balance} 🪙`;
+            
+            saveCart([]);
+            discountApplied = false;
+            document.getElementById("discount-msg").style.display = "none";
+            const codeInput = document.getElementById("discount-code");
+            if (codeInput) { codeInput.value = ""; codeInput.disabled = false; }
+            const applyBtn = document.getElementById("apply-discount-btn");
+            if (applyBtn) applyBtn.disabled = false;
+
+            renderCart();
+            
+            if (typeof updateCartCounter === "function") {
+                updateCartCounter();
+            }
+        } else {
+            showToast("Error en la compra: " + (data.error || "Desconocido"), "error");
+        }
+        
+        checkoutBtn.textContent = "Confirmar Compra";
+        checkoutBtn.disabled = false;
+    } catch (error) {
+        console.error("Error al procesar compra:", error);
+        showToast("Error de conexión al procesar la compra.", "error");
+        const checkoutBtn = document.getElementById("checkout-btn");
+        checkoutBtn.textContent = "Confirmar Compra";
+        checkoutBtn.disabled = false;
+    }
+}
 
 function getCart() {
     const raw = sessionStorage.getItem("pokesobres_cart");
@@ -139,6 +182,9 @@ function renderCart() {
         container.appendChild(tr);
     });
 
+    if (discountApplied) {
+        total = 0;
+    }
     totalEl.textContent = `${total} 🪙`;
 }
 
