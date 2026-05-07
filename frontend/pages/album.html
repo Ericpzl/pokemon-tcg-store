@@ -420,6 +420,19 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación Personalizado -->
+    <div class="card-modal-overlay" id="custom-confirm-modal" style="z-index: 3000; display: none;">
+        <div class="card-modal" style="max-width: 400px; padding: 2.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem;">
+            <div style="font-size: 3rem; background: rgba(240, 165, 0, 0.2); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f0a500; box-shadow: 0 0 20px rgba(240,165,0,0.4);">💰</div>
+            <h2 style="font-size: 1.8rem; margin: 0;">Confirmar Venta</h2>
+            <p id="custom-confirm-text" style="color: var(--text-muted); font-size: 1.1rem; margin: 0; line-height: 1.5;"></p>
+            <div style="display: flex; gap: 1rem; width: 100%; margin-top: 1rem;">
+                <button class="btn-sell-cancel" style="flex: 1; padding: 1rem;" onclick="closeCustomConfirm()">Cancelar</button>
+                <button class="btn-sell-confirm" style="flex: 1; padding: 1rem;" id="custom-confirm-yes">Confirmar Venta</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/config.js"></script>
     <script src="../js/app.js"></script>
     <script src="../js/album.js"></script>

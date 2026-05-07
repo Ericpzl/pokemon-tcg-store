@@ -111,18 +111,29 @@ function updateSellBar() {
     bar.style.display = "flex";
 }
 
-async function confirmSell() {
-    if (selectedCards.size === 0) return;
+function showCustomConfirm(text, onConfirm) {
+    document.getElementById("custom-confirm-text").innerHTML = text;
+    const modal = document.getElementById("custom-confirm-modal");
+    const yesBtn = document.getElementById("custom-confirm-yes");
+    
+    // Clear previous event listeners by cloning
+    const newYesBtn = yesBtn.cloneNode(true);
+    yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+    
+    newYesBtn.onclick = () => {
+        closeCustomConfirm();
+        onConfirm();
+    };
+    
+    modal.style.display = "flex";
+}
 
+window.closeCustomConfirm = function() {
+    document.getElementById("custom-confirm-modal").style.display = "none";
+};
+
+async function executeSellRequest(cardIds, expectedTotal) {
     const user = JSON.parse(sessionStorage.getItem("user"));
-    const cardIds = Array.from(selectedCards);
-
-    const total = allCards
-        .filter(c => selectedCards.has(c.cardId))
-        .reduce((sum, c) => sum + c.price, 0);
-
-    if (!confirm(`¿Vender ${cardIds.length} carta(s) por ${total.toFixed(0)}🪙?`)) return;
-
     try {
         const response = await fetch(`${API_BASE_URL}/album/sell`, {
             method: "POST",
@@ -132,12 +143,8 @@ async function confirmSell() {
         const data = await response.json();
 
         if (response.ok) {
-            // Update local balance display
             const newBalance = Math.round(data.coinsEarned);
             showSellSuccess(newBalance);
-
-            // Clear selection and reload
-            selectedCards.clear();
             
             // Actualizamos la información del usuario local
             user.balance += newBalance;
@@ -145,6 +152,7 @@ async function confirmSell() {
             const balanceEl = document.getElementById("nav-user-balance");
             if (balanceEl) balanceEl.textContent = `${user.balance} 🪙`;
 
+            selectedCards.clear();
             await loadAlbum(user.id);
         } else {
             showToast("Error al vender: " + (data.error || "Error desconocido"), "error");
@@ -152,6 +160,21 @@ async function confirmSell() {
     } catch (err) {
         showToast("Error de conexión al vender.", "error");
     }
+}
+
+function confirmSell() {
+    if (selectedCards.size === 0) return;
+
+    const cardIds = Array.from(selectedCards);
+    const total = allCards
+        .filter(c => selectedCards.has(c.cardId))
+        .reduce((sum, c) => sum + c.price, 0);
+
+    const msg = `¿Estás seguro de que quieres vender <b>${cardIds.length} carta(s)</b> por <b style="color:var(--success-color);">${total.toFixed(0)} 🪙</b>?`;
+    
+    showCustomConfirm(msg, () => {
+        executeSellRequest(cardIds, total);
+    });
 }
 
 function showSellSuccess(earned) {
@@ -216,42 +239,18 @@ function openCardModal(card) {
     };
 }
 
-async function sellFromModal() {
+function sellFromModal() {
     if (!currentOpenedCard) return;
     
-    const user = JSON.parse(sessionStorage.getItem("user"));
     const cardId = currentOpenedCard.cardId;
     const price = currentOpenedCard.price;
 
-    if (!confirm(`¿Estás seguro de que quieres vender "${currentOpenedCard.name}" por ${price.toFixed(0)}🪙?`)) return;
+    const msg = `¿Estás seguro de que quieres vender <b>"${currentOpenedCard.name}"</b> por <b style="color:var(--success-color);">${price.toFixed(0)} 🪙</b>?`;
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/album/sell`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: user.id, cardIds: [cardId] })
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-            const newBalance = Math.round(data.coinsEarned);
-            showSellSuccess(newBalance);
-            closeCardModal();
-            selectedCards.delete(cardId);
-            
-            // Actualizamos la información del usuario local
-            user.balance += newBalance;
-            sessionStorage.setItem("user", JSON.stringify(user));
-            const balanceEl = document.getElementById("nav-user-balance");
-            if (balanceEl) balanceEl.textContent = `${user.balance} 🪙`;
-
-            await loadAlbum(user.id);
-        } else {
-            showToast("Error al vender: " + (data.error || "Error desconocido"), "error");
-        }
-    } catch (err) {
-        showToast("Error de conexión al vender.", "error");
-    }
+    showCustomConfirm(msg, () => {
+        executeSellRequest([cardId], price);
+        closeCardModal();
+    });
 }
 
 function closeCardModal() {
