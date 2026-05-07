@@ -235,6 +235,10 @@
             <div id="roulette-track" style="display: flex; gap: 1rem; position: absolute; left: 50%; transform: translateX(0); height: 280px; align-items: center;"></div>
         </div>
 
+        <div id="skip-action" style="display: none; margin-top: 2rem; z-index: 2;">
+            <button class="btn" style="background: var(--error-color); font-weight: bold; width: auto; padding: 0.8rem 2rem;" onclick="skipRoulette()">⏩ Saltar Animación</button>
+        </div>
+
         <div id="opening-actions" style="display: none; margin-top: 3rem; z-index: 2;">
             <button class="btn" style="background: var(--bg-secondary); margin-right: 1rem;" onclick="closeOpeningModal()">Volver al Inventario</button>
             <button class="btn" onclick="window.location.href='album.html'">Ir al Álbum</button>

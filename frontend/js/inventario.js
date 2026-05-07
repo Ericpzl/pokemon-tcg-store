@@ -146,6 +146,27 @@ async function loadInventory(userId) {
     }
 }
 
+let rouletteTimeout = null;
+let rouletteEndFunction = null;
+
+window.skipRoulette = function() {
+    if (rouletteTimeout) {
+        clearTimeout(rouletteTimeout);
+        rouletteTimeout = null;
+    }
+    
+    const track = document.getElementById("roulette-track");
+    track.style.transition = "none";
+    track.style.transform = track.dataset.finalTransform || "translateX(0px)";
+    
+    if (rouletteEndFunction) {
+        rouletteEndFunction();
+        rouletteEndFunction = null;
+    }
+    
+    document.getElementById("skip-action").style.display = "none";
+};
+
 window.openPack = async function(expansionId) {
     const userData = sessionStorage.getItem("user");
     if (!userData) return;
@@ -222,6 +243,8 @@ window.openPack = async function(expansionId) {
             const randomOffset  = (Math.random() - 0.5) * (CARD_WIDTH - 20);
             const finalTransform = -(WINNER_INDEX * CARD_TOTAL + CARD_WIDTH / 2 + randomOffset);
 
+            track.dataset.finalTransform = `translateX(${finalTransform}px)`;
+
             void track.offsetWidth; // force reflow
 
             // 🔊 Start sounds BEFORE spinning so first tick fires immediately
@@ -229,16 +252,26 @@ window.openPack = async function(expansionId) {
 
             track.style.transition = `transform ${SPIN_DURATION}s cubic-bezier(0.15, 0.85, 0.15, 1)`;
             track.style.transform  = `translateX(${finalTransform}px)`;
+            
+            document.getElementById("skip-action").style.display = "block";
 
-            setTimeout(() => {
+            rouletteEndFunction = () => {
                 const winnerEl = document.getElementById(`rc-${WINNER_INDEX}`);
                 if (winnerEl) winnerEl.classList.add("winner");
 
                 title.textContent = `¡Has conseguido a ${wonCard.name}!`;
                 title.style.color = "var(--success-color)";
                 actions.style.display = "flex";
+                document.getElementById("skip-action").style.display = "none";
 
                 loadInventory(user.id);
+            };
+
+            rouletteTimeout = setTimeout(() => {
+                if(rouletteEndFunction) {
+                    rouletteEndFunction();
+                    rouletteEndFunction = null;
+                }
             }, SPIN_DURATION * 1000);
 
         } else {
