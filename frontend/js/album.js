@@ -138,10 +138,14 @@ async function confirmSell() {
 
             // Clear selection and reload
             selectedCards.clear();
-            await loadAlbum(user.id);
+            
+            // Actualizamos la información del usuario local
+            user.balance += newBalance;
+            sessionStorage.setItem("user", JSON.stringify(user));
+            const balanceEl = document.getElementById("nav-user-balance");
+            if (balanceEl) balanceEl.textContent = `${user.balance} 🪙`;
 
-            // Update nav balance if possible
-            if (window.updateNavBalance) window.updateNavBalance();
+            await loadAlbum(user.id);
         } else {
             showToast("Error al vender: " + (data.error || "Error desconocido"), "error");
         }
@@ -212,10 +216,42 @@ function openCardModal(card) {
     };
 }
 
-function sellFromModal() {
+async function sellFromModal() {
     if (!currentOpenedCard) return;
-    toggleSelect(currentOpenedCard.cardId);
-    closeCardModal();
+    
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    const cardId = currentOpenedCard.cardId;
+    const price = currentOpenedCard.price;
+
+    if (!confirm(`¿Estás seguro de que quieres vender "${currentOpenedCard.name}" por ${price.toFixed(0)}🪙?`)) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/album/sell`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id, cardIds: [cardId] })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            const newBalance = Math.round(data.coinsEarned);
+            showSellSuccess(newBalance);
+            closeCardModal();
+            selectedCards.delete(cardId);
+            
+            // Actualizamos la información del usuario local
+            user.balance += newBalance;
+            sessionStorage.setItem("user", JSON.stringify(user));
+            const balanceEl = document.getElementById("nav-user-balance");
+            if (balanceEl) balanceEl.textContent = `${user.balance} 🪙`;
+
+            await loadAlbum(user.id);
+        } else {
+            showToast("Error al vender: " + (data.error || "Error desconocido"), "error");
+        }
+    } catch (err) {
+        showToast("Error de conexión al vender.", "error");
+    }
 }
 
 function closeCardModal() {

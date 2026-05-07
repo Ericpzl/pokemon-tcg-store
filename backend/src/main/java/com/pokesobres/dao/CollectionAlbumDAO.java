@@ -57,7 +57,7 @@ public class CollectionAlbumDAO {
                     rs.getString("rarity"),
                     rs.getInt("hp"),
                     rs.getString("image_url"),
-                    rs.getDouble("price"),
+                    rs.getDouble("price") * 10,
                     rs.getInt("quantity"),
                     rs.getBoolean("is_favorite"),
                     rs.getString("obtained_at")
@@ -109,7 +109,7 @@ public class CollectionAlbumDAO {
                     sel.setInt(2, cardId);
                     java.sql.ResultSet rs = sel.executeQuery();
                     if (rs.next() && rs.getInt("quantity") > 0) {
-                        totalEarned += rs.getDouble("price");
+                        totalEarned += (rs.getDouble("price") * 10);
                     } else {
                         continue; // skip if 0 quantity
                     }
