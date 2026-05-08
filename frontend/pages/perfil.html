@@ -150,7 +150,10 @@
                 style="font-size: 1.8rem; text-decoration: none; transition: transform 0.2s; display: inline-block; margin-left: 0.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: pointer;"
                 onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"
                 title="Añadir Monedas">💎</a>
-            <button onclick="toggleTheme()" class="theme-toggle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; margin-left: 0.5rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" title="Cambiar Tema">🌞</button>
+            <button onclick="toggleTheme()" class="theme-toggle-btn"
+                style="background: none; border: none; cursor: pointer; font-size: 1.5rem; margin-left: 0.5rem; transition: transform 0.2s;"
+                onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"
+                title="Cambiar Tema">🌞</button>
         </nav>
     </header>
 
@@ -198,21 +201,26 @@
                         </div>
                         <div class="form-group">
                             <label>URL de Foto de Perfil (Opcional)</label>
-                            <input type="url" id="input-avatar" placeholder="https://ejemplo.com/mifoto.jpg">
+                            <input type="text" id="input-avatar" placeholder="https://ejemplo.com/mifoto.jpg">
                         </div>
                         <button type="submit" class="btn">Guardar Información</button>
                     </form>
                 </div>
 
                 <div class="profile-section" id="admin-section"
-                    style="display: none; background: linear-gradient(145deg, #1a1a2e, #16213e); border: 2px solid var(--warning-color); box-shadow: 0 0 20px rgba(240, 165, 0, 0.4); border-radius: 12px; padding: 2.5rem;">
-                    <h3 style="color: var(--warning-color); font-size: 1.8rem; margin-top: 0; text-align: center; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">👑 Panel de Dios</h3>
-                    <p style="color: #e2e8f0; font-size: 1rem; margin-bottom: 2rem; text-align: center; line-height: 1.6;">Como administrador supremo, tienes el poder absoluto sobre la tienda.</p>
+                    style="display: none; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem;">
+                    <h3
+                        style="color: var(--text-color); font-size: 1.4rem; margin-top: 0; text-align: center; font-weight: 600;">
+                        Panel de Administración</h3>
+                    <p
+                        style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem; text-align: center;">
+                        Como administrador supremo, tienes el poder absoluto sobre la tienda.</p>
                     <button class="btn"
-                        style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: #1a1a2e; font-weight: 800; width: 100%; margin-bottom: 1.5rem; padding: 1.2rem; font-size: 1.1rem; border: none; border-radius: 8px; box-shadow: 0 4px 15px rgba(253, 160, 133, 0.5); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-                        onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(253, 160, 133, 0.7)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(253, 160, 133, 0.5)'"
-                        onclick="window.location.href='admin.html'">⚡ IR AL PANEL SECRETO (Añadir Sobres) ⚡</button>
-                    <button class="btn-danger" style="padding: 1.2rem; font-size: 1.1rem; border-radius: 8px; font-weight: bold; background: linear-gradient(135deg, #ff416c, #ff4b2b); border: none; box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'" onclick="resetDatabase()">🔥 Resetear Base de Datos (Borrar Usuarios) 🔥</button>
+                        style="width: 100%; margin-bottom: 1rem; display: block;"
+                        onclick="window.location.href='admin.html'">Añadir nuevo sobre</button>
+                    <button class="btn-danger"
+                        style="width: 100%; display: block;"
+                        onclick="resetDatabase()">Resetear Base de Datos</button>
                 </div>
 
                 <div class="profile-section">
