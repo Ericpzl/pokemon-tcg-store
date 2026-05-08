@@ -135,7 +135,7 @@ function logout() {
 }
 
 async function resetDatabase() {
-    if (!confirm("⚠️ ¡ADVERTENCIA CRÍTICA!\n\nEsto borrará a TODOS los usuarios (excepto admins), sus transacciones, inventarios y álbumes.\nLas cartas y expansiones NO se borrarán.\n\n¿Estás completamente seguro de que quieres limpiar la base de datos?")) {
+    if (!confirm("⚠️ ¡ADVERTENCIA CRÍTICA!\n\nEsto borrará a TODOS los usuarios (excepto admins), sus transacciones, inventarios y álbumes.\nLas cartas y expansiones NO se borrarán.\n\n¿Estás completamente seguro/a de que quieres limpiar la base de datos?")) {
         return;
     }
     

@@ -16,11 +16,31 @@ document.addEventListener("DOMContentLoaded", () => {
 function applyDiscount() {
     const code = document.getElementById("discount-code").value.trim().toLowerCase();
     if (code === "proyectofinal2026") {
+        const userData = sessionStorage.getItem("user");
+        if (!userData) {
+            showToast("Debes iniciar sesión para usar un cupón.", "error");
+            return;
+        }
+        const user = JSON.parse(userData);
+
+        if (user.username !== "DIOS" && localStorage.getItem(`coupon_used_${user.username}`)) {
+            showToast("Ya has utilizado este cupón.", "error");
+            return;
+        }
+
+        const cart = getCart();
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        if (totalItems > 3) {
+            showToast("El cupón solo es válido para un máximo de 3 sobres en el carrito.", "error");
+            return;
+        }
+
         discountApplied = true;
         document.getElementById("discount-msg").style.display = "block";
+        document.getElementById("discount-msg").textContent = "¡Cupón aplicado! 80% de descuento en tu compra.";
         document.getElementById("discount-code").disabled = true;
         document.getElementById("apply-discount-btn").disabled = true;
-        showToast("¡Código aplicado correctamente! Tu primera compra es gratis.", "success");
+        showToast("¡Código aplicado correctamente!", "success");
         renderCart();
     } else {
         showToast("Código no válido.", "error");
@@ -32,9 +52,11 @@ function showCheckoutConfirm() {
     if (cart.length === 0) return;
 
     let total = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
-    if (discountApplied) total = 0;
+    if (discountApplied) {
+        total = cart.reduce((sum, item) => sum + (Math.round(item.unitPrice * 0.2) * item.quantity), 0);
+    }
 
-    const msg = `¿Estás seguro de que deseas confirmar esta compra por un total de <b style="color:var(--success-color);">${total} 🪙</b>?`;
+    const msg = `¿Estás seguro/a de que deseas confirmar esta compra por un total de <b style="color:var(--success-color);">${total} 🪙</b>?`;
     document.getElementById("checkout-confirm-text").innerHTML = msg;
     document.getElementById("checkout-confirm-modal").style.display = "flex";
 }
@@ -56,10 +78,16 @@ async function executePurchase() {
 
     const user = JSON.parse(userData);
     
-    // Si hay descuento, ponemos el precio a 0 en la petición
+    // Si hay descuento, aplicamos el 80% al unitPrice de cada item de este payload.
+    // También guardamos el flag para que el usuario no pueda usarlo más si no es DIOS.
+    if (discountApplied && user.username !== "DIOS") {
+        localStorage.setItem(`coupon_used_${user.username}`, "true");
+    }
+
     const payloadCart = cart.map(item => {
         if (discountApplied) {
-            return { ...item, unitPrice: 0, subtotal: 0 };
+            let discountedPrice = Math.round(item.unitPrice * 0.2);
+            return { ...item, unitPrice: discountedPrice, subtotal: discountedPrice * item.quantity };
         }
         return item;
     });
@@ -156,17 +184,20 @@ function renderCart() {
         const subtotal = item.unitPrice * item.quantity;
         total += subtotal;
 
+        let currentPrice = discountApplied ? Math.round(item.unitPrice * 0.2) : item.unitPrice;
+        let subtotalDisplay = currentPrice * item.quantity;
+
         const tr = document.createElement("tr");
         tr.style.borderBottom = "1px solid var(--glass-border)";
         
         tr.innerHTML = `
             <td style="padding: 1rem;">
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    ${item.coverImage ? `<img src="${item.coverImage}" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">` : `<div style="width: 40px; height: 60px; background: rgba(0,0,0,0.3); border-radius: 4px;"></div>`}
+                    ${item.coverImage ? `<img src="${item.coverImage}" style="width: 50px; height: 75px; object-fit: contain; border-radius: 4px;">` : `<div style="width: 50px; height: 75px; background: rgba(0,0,0,0.3); border-radius: 4px;"></div>`}
                     <span style="font-weight: 600;">${item.expansionName}</span>
                 </div>
             </td>
-            <td style="padding: 1rem; color: var(--text-muted);">${item.unitPrice} 🪙</td>
+            <td style="padding: 1rem; color: var(--text-muted);">${currentPrice} 🪙 ${discountApplied ? '<span style="color:var(--success-color); font-size:0.8rem;">(80% DTO)</span>' : ''}</td>
             <td style="padding: 1rem; text-align: center;">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     <button class="btn btn-sm" style="padding: 0.2rem 0.6rem; background: var(--bg-primary);" onclick="updateQuantity(${item.expansionId}, -1)">-</button>
@@ -174,7 +205,7 @@ function renderCart() {
                     <button class="btn btn-sm" style="padding: 0.2rem 0.6rem; background: var(--bg-primary);" onclick="updateQuantity(${item.expansionId}, 1)">+</button>
                 </div>
             </td>
-            <td style="padding: 1rem; text-align: right; color: var(--success-color); font-weight: bold;">${subtotal} 🪙</td>
+            <td style="padding: 1rem; text-align: right; color: var(--success-color); font-weight: bold;">${subtotalDisplay} 🪙</td>
             <td style="padding: 1rem; text-align: center;">
                 <button class="btn btn-sm" style="background: var(--error-color);" onclick="removeItem(${item.expansionId})">X</button>
             </td>
@@ -183,13 +214,22 @@ function renderCart() {
     });
 
     if (discountApplied) {
-        total = 0;
+        total = cart.reduce((sum, item) => sum + (Math.round(item.unitPrice * 0.2) * item.quantity), 0);
     }
     totalEl.textContent = `${total} 🪙`;
 }
 
 function updateQuantity(id, delta) {
     let cart = getCart();
+
+    if (delta > 0 && discountApplied) {
+        const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+        if (totalItems >= 3) {
+            showToast("El cupón solo permite un máximo de 3 sobres. Elimina el cupón o reduce la cantidad.", "error");
+            return;
+        }
+    }
+
     const item = cart.find(x => x.expansionId === id);
     if (!item) return;
 
