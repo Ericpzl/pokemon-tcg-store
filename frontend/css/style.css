@@ -236,7 +236,7 @@ a:hover {
     header nav {
         flex-wrap: wrap !important;
         justify-content: center !important;
-        gap: 1rem !important;
+        gap: 0.8rem !important;
         width: 100% !important;
     }
     
@@ -257,8 +257,8 @@ a:hover {
     
     /* Grids for store and inventory */
     .store-grid, .inventory-grid, .album-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
-        gap: 1rem !important;
+        grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
+        gap: 0.8rem !important;
     }
     
     /* Perfil */
@@ -273,11 +273,20 @@ a:hover {
     }
     
     /* Modals (Pack, Card, Confirmations) */
+    .pack-modal-overlay, .card-modal-overlay, .modal-overlay {
+        align-items: flex-start !important;
+        padding: 1rem !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .pack-modal, .card-modal {
         flex-direction: column !important;
         padding: 1.5rem !important;
         gap: 1.5rem !important;
         align-items: center !important;
+        margin: 2rem auto !important; /* Espacio para poder hacer scroll cómodo */
+        width: 100% !important;
     }
     
     .pack-3d-wrap {
@@ -285,17 +294,17 @@ a:hover {
     }
     
     .pack-3d {
-        width: 140px !important;
-        height: 200px !important;
+        width: 130px !important;
+        height: 180px !important;
     }
     
     .holo-card-container {
-        width: 200px !important;
-        height: 280px !important;
+        width: 180px !important;
+        height: 250px !important;
     }
     
     .modal-img {
-        width: 200px !important;
+        width: 180px !important;
     }
     
     /* Cart Table responsive */
@@ -317,13 +326,14 @@ a:hover {
     .album-filters {
         flex-direction: column !important;
         align-items: stretch !important;
+        margin: 1rem 0 !important;
     }
     
     /* Floating Bars (Cart, Sell) */
     .cart-bar, .sell-bar {
-        width: 90% !important;
+        width: 95% !important;
         flex-direction: column !important;
-        gap: 1rem !important;
+        gap: 0.8rem !important;
         padding: 1rem !important;
         text-align: center;
         bottom: 1rem !important;
