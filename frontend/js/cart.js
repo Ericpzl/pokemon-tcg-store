@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function applyDiscount() {
     const code = document.getElementById("discount-code").value.trim().toLowerCase();
-    if (code === "proyectofinal2026") {
+    if (code === "primercompra") {
         const userData = sessionStorage.getItem("user");
         if (!userData) {
             showToast("Debes iniciar sesión para usar un cupón.", "error");
