@@ -218,30 +218,45 @@
         </div>
     </main>
 
-    <!-- Pack Opening Modal -->
-    <div class="modal-overlay" id="opening-modal" style="display: none; background: rgba(0,0,0,0.95); z-index: 1000; flex-direction: column; overflow: hidden;">
-        <h2 id="opening-title" style="color: white; margin-bottom: 1.5rem; font-size: 2rem; text-shadow: 0 0 10px var(--primary-color); z-index: 2;">Abriendo Sobre...</h2>
+    <!-- Quantity Picker Modal -->
+    <div class="modal-overlay" id="qty-modal" style="display:none; background:rgba(0,0,0,0.85); z-index:1100; flex-direction:column; gap:1.5rem;">
+        <div style="background:var(--bg-secondary); border:1px solid var(--glass-border); border-radius:16px; padding:2.5rem; text-align:center; max-width:380px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.8);">
+            <h3 style="margin-bottom:0.5rem;">¿Cuántos sobres quieres abrir?</h3>
+            <p id="qty-subtitle" style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;"></p>
+            <div style="display:flex; align-items:center; justify-content:center; gap:1rem; margin-bottom:1.5rem;">
+                <button onclick="adjustQty(-1)" style="background:var(--bg-primary); border:1px solid var(--glass-border); border-radius:50%; width:40px; height:40px; font-size:1.5rem; cursor:pointer; color:white;">−</button>
+                <span id="qty-value" style="font-size:2.5rem; font-weight:bold; min-width:60px;">1</span>
+                <button onclick="adjustQty(1)" style="background:var(--bg-primary); border:1px solid var(--glass-border); border-radius:50%; width:40px; height:40px; font-size:1.5rem; cursor:pointer; color:white;">+</button>
+            </div>
+            <div style="display:flex; gap:1rem; justify-content:center;">
+                <button class="btn" style="background:var(--bg-primary);" onclick="closeQtyModal()">Cancelar</button>
+                <button class="btn" id="qty-confirm-btn" onclick="confirmOpenPacks()">¡Abrir!</button>
+            </div>
+        </div>
+    </div>
 
-        <!-- Loading state (shown while fetch runs) -->
+    <!-- Multi-Pack Opening Modal -->
+    <div class="modal-overlay" id="opening-modal" style="display:none; background:rgba(0,0,0,0.95); z-index:1000; flex-direction:column; overflow-y:auto; padding:2rem 0;">
+        <h2 id="opening-title" style="color:white; margin-bottom:1.5rem; font-size:1.8rem; text-shadow:0 0 10px var(--primary-color); z-index:2; text-align:center; position:sticky; top:0; background:rgba(0,0,0,0.9); padding:1rem; width:100%;">Abriendo Sobres...</h2>
+
+        <!-- Loading state -->
         <div id="opening-loading" class="loading-overlay">
             <div class="pokeball-spinner"></div>
             <p class="loading-text">
-                Preparando tu sobre<span class="loading-dots"></span><br>
-                <span style="font-size:0.8rem; color: #555; margin-top:0.5rem; display:block;">Si tarda más de 10s, el servidor se estaba despertando. ¡Ya casi!</span>
+                Preparando tus sobres<span class="loading-dots"></span><br>
+                <span style="font-size:0.8rem; color:#555; margin-top:0.5rem; display:block;">Si tarda más de 10s, el servidor se estaba despertando. ¡Ya casi!</span>
             </p>
         </div>
-        
-        <div id="roulette-container" style="display:none; position: relative; width: 100%; height: 320px; overflow: hidden; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); box-shadow: inset 0 0 50px rgba(0,0,0,1);">
-            <div style="position: absolute; width: 4px; height: 100%; background: var(--error-color); z-index: 10; left: 50%; transform: translateX(-50%); box-shadow: 0 0 15px var(--error-color);"></div>
-            <div id="roulette-track" style="display: flex; gap: 1rem; position: absolute; left: 50%; transform: translateX(0); height: 280px; align-items: center;"></div>
+
+        <!-- Roulettes stacked vertically -->
+        <div id="multi-roulette-container" style="display:none; width:100%; flex-direction:column; gap:2rem; align-items:center; padding-bottom:2rem;"></div>
+
+        <div id="skip-action" style="display:none; margin-top:1rem; z-index:2; position:sticky; bottom:1rem; text-align:center;">
+            <button class="btn" style="background:var(--error-color); font-weight:bold; width:auto; padding:0.8rem 2rem;" onclick="skipAllRoulettes()">⏩ Saltar Animaciones</button>
         </div>
 
-        <div id="skip-action" style="display: none; margin-top: 2rem; z-index: 2;">
-            <button class="btn" style="background: var(--error-color); font-weight: bold; width: auto; padding: 0.8rem 2rem;" onclick="skipRoulette()">⏩ Saltar Animación</button>
-        </div>
-
-        <div id="opening-actions" style="display: none; margin-top: 3rem; z-index: 2;">
-            <button class="btn" style="background: var(--bg-secondary); margin-right: 1rem;" onclick="closeOpeningModal()">Volver al Inventario</button>
+        <div id="opening-actions" style="display:none; margin-top:2rem; z-index:2; text-align:center; padding-bottom:1rem;">
+            <button class="btn" style="background:var(--bg-secondary); margin-right:1rem;" onclick="closeOpeningModal()">Volver al Inventario</button>
             <button class="btn" onclick="window.location.href='album.html'">Ir al Álbum</button>
         </div>
     </div>
@@ -249,7 +264,6 @@
     <script src="../js/config.js"></script>
     <script src="../js/inventario.js"></script>
     <script>
-        // Wake up Render server as soon as page loads (avoids cold start delay when opening)
         fetch(`${API_BASE_URL.replace('/api','')}/`).catch(() => {});
     </script>
 </body>
