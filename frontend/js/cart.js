@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function applyDiscount() {
     const code = document.getElementById("discount-code").value.trim().toLowerCase();
-    if (code === "primercompra") {
+    if (code === "primeracompra") {
         const userData = sessionStorage.getItem("user");
         if (!userData) {
             showToast("Debes iniciar sesión para usar un cupón.", "error");
@@ -77,7 +77,7 @@ async function executePurchase() {
     }
 
     const user = JSON.parse(userData);
-    
+
     // Si hay descuento, aplicamos el 80% al unitPrice de cada item de este payload.
     // También guardamos el flag para que el usuario no pueda usarlo más si no es DIOS.
     if (discountApplied && user.username !== "DIOS") {
@@ -112,13 +112,13 @@ async function executePurchase() {
 
         if (response.ok) {
             showToast("¡Compra realizada con éxito!", "success");
-            
+
             user.balance = data.newBalance;
             sessionStorage.setItem("user", JSON.stringify(user));
-            
+
             const balanceEl = document.getElementById("nav-user-balance");
             if (balanceEl) balanceEl.textContent = `${user.balance} 🪙`;
-            
+
             saveCart([]);
             discountApplied = false;
             document.getElementById("discount-msg").style.display = "none";
@@ -128,14 +128,14 @@ async function executePurchase() {
             if (applyBtn) applyBtn.disabled = false;
 
             renderCart();
-            
+
             if (typeof updateCartCounter === "function") {
                 updateCartCounter();
             }
         } else {
             showToast("Error en la compra: " + (data.error || "Desconocido"), "error");
         }
-        
+
         checkoutBtn.textContent = "Confirmar Compra";
         checkoutBtn.disabled = false;
     } catch (error) {
@@ -189,7 +189,7 @@ function renderCart() {
 
         const tr = document.createElement("tr");
         tr.style.borderBottom = "1px solid var(--glass-border)";
-        
+
         tr.innerHTML = `
             <td style="padding: 1rem;">
                 <div style="display: flex; align-items: center; gap: 1rem;">
