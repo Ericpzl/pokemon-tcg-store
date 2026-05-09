@@ -220,3 +220,116 @@ a:hover {
 .toast-error {
     background-color: #ef4444; /* Rojo error */
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (MÓVIL)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Headers & Navigation */
+    header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 1rem !important;
+        gap: 1rem !important;
+    }
+    
+    header nav {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 1rem !important;
+        width: 100% !important;
+    }
+    
+    /* Layout Overrides */
+    main {
+        padding: 1rem !important;
+    }
+    
+    main[style*="display: flex"] {
+        flex-direction: column !important;
+    }
+    
+    aside {
+        width: 100% !important;
+        align-self: stretch !important;
+        margin-top: 1rem;
+    }
+    
+    /* Grids for store and inventory */
+    .store-grid, .inventory-grid, .album-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+        gap: 1rem !important;
+    }
+    
+    /* Perfil */
+    .profile-container {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .avatar-container {
+        width: 80px !important;
+        height: 80px !important;
+        font-size: 2rem !important;
+    }
+    
+    /* Modals (Pack, Card, Confirmations) */
+    .pack-modal, .card-modal {
+        flex-direction: column !important;
+        padding: 1.5rem !important;
+        gap: 1.5rem !important;
+        align-items: center !important;
+    }
+    
+    .pack-3d-wrap {
+        width: 100% !important;
+    }
+    
+    .pack-3d {
+        width: 140px !important;
+        height: 200px !important;
+    }
+    
+    .holo-card-container {
+        width: 200px !important;
+        height: 280px !important;
+    }
+    
+    .modal-img {
+        width: 200px !important;
+    }
+    
+    /* Cart Table responsive */
+    main > div[style*="background: var(--glass-bg)"] {
+        overflow-x: auto !important;
+        padding: 1rem !important;
+    }
+    
+    table {
+        min-width: 500px;
+    }
+    
+    /* Forms, Buttons & Inputs */
+    .btn, .form-control, input, select {
+        width: 100% !important;
+    }
+    
+    /* Album filters */
+    .album-filters {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    /* Floating Bars (Cart, Sell) */
+    .cart-bar, .sell-bar {
+        width: 90% !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+        padding: 1rem !important;
+        text-align: center;
+        bottom: 1rem !important;
+    }
+    
+    .btn-cart-confirm, .btn-cart-cancel, .btn-sell-confirm, .btn-sell-cancel {
+        width: 100% !important;
+    }
+}
